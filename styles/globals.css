@@ -1,0 +1,165 @@
+:root {
+  --ink: #12213B;
+  --ink-soft: #3B4A63;
+  --paper: #F3F5F4;
+  --surface: #FFFFFF;
+  --line: #DCE1E6;
+  --teal: #1F7A5C;
+  --teal-soft: #E4F2ED;
+  --gold: #C98A2C;
+  --gold-soft: #FBF0DD;
+  --red: #B3432B;
+  --red-soft: #F8E9E5;
+  --font-display: "Manrope", "Hind Siliguri", sans-serif;
+  --font-body: "Hind Siliguri", "Manrope", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar .brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.topbar .brand span { color: var(--teal); }
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  width: 100%;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+}
+
+.field { margin-bottom: 18px; }
+
+.field label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+  background: var(--surface);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.96rem;
+  cursor: pointer;
+}
+
+.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-outline { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-sm { padding: 7px 14px; font-size: 0.85rem; }
+
+.error-text { color: var(--red); font-size: 0.88rem; margin-top: 10px; }
+.help-text { color: var(--ink-soft); font-size: 0.88rem; }
+
+/* --- signature element: ledger stamp badges for approval-driven statuses --- */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transform: rotate(-2deg);
+}
+
+.stamp-pending { color: var(--gold); background: var(--gold-soft); }
+.stamp-active { color: var(--teal); background: var(--teal-soft); }
+.stamp-rejected, .stamp-suspended { color: var(--red); background: var(--red-soft); }
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  gap: 16px;
+}
+
+.list-row:last-child { border-bottom: none; }
+
+.muted { color: var(--ink-soft); font-size: 0.9rem; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-soft);
+}

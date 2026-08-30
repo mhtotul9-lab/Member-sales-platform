@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // members/{uid} — profile + status. Members can read/edit their own basic
+    // info, but can NEVER touch status, role, or financial fields themselves.
+    // Those are only ever written by API routes using the Admin SDK, which
+    // bypasses these rules — so in practice only admin-approved server code
+    // changes status/role.
+    match /members/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid)
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.role == 'member';
+      allow update: if isAdmin() || (
+                      isOwner(uid) &&
+                      request.resource.data.status == resource.data.status &&
+                      request.resource.data.role == resource.data.role
+                    );
+      allow delete: if false;
+    }
+
+    // Everything else defaults to admin-only / server-only until each
+    // later phase (products, orders, wallets, ...) adds its own rules.
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
