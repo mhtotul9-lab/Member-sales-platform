@@ -63,7 +63,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
 
   return (
     <form onSubmit={handleSubmit}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="form-grid-2">
         <div className="field">
           <label htmlFor="name">প্রোডাক্টের নাম</label>
           <input id="name" required value={form.name} onChange={(e) => update("name", e.target.value)} />

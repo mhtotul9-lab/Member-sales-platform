@@ -1,6 +1,7 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   try {
@@ -16,3 +17,5 @@ export default async function handler(req, res) {
   const snap = await query.limit(150).get();
   return res.status(200).json({ logs: snap.docs.map((d) => ({ id: d.id, ...d.data() })) });
 }
+
+export default withErrorHandling(handler);

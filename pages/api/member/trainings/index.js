@@ -1,6 +1,7 @@
 import { requireActiveMember, adminDb } from "../../../../lib/firebaseAdmin";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   let auth;
@@ -24,3 +25,5 @@ export default async function handler(req, res) {
   const withProgress = trainings.map((t) => ({ ...t, progressStatus: progressByTraining[t.id] || "not_started" }));
   return res.status(200).json({ trainings: withProgress });
 }
+
+export default withErrorHandling(handler);

@@ -2,8 +2,9 @@ import { FieldValue } from "firebase-admin/firestore";
 import { requireActiveMember, adminDb } from "../../../../lib/firebaseAdmin";
 import { getSettings } from "../../../../lib/business";
 import { notifyAdmins } from "../../../../lib/notify";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   let auth;
   try {
     auth = await requireActiveMember(req);
@@ -86,3 +87,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default withErrorHandling(handler);

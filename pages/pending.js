@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
+import Logo from "../components/Logo";
 
 export default function Pending() {
   const { user, profile, loading } = useAuth();
@@ -21,7 +22,7 @@ export default function Pending() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/">সেলস<span>পার্টনার</span></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span>পার্টনার</span></a>
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>

@@ -1,10 +1,11 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { requireAdmin, adminDb } from "../../../../../lib/firebaseAdmin";
 import { notifyUser } from "../../../../../lib/notify";
+import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
 const ALLOWED_STATUSES = ["approved", "rejected", "paid"];
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   let decoded;
@@ -99,3 +100,5 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ ok: true });
 }
+
+export default withErrorHandling(handler);

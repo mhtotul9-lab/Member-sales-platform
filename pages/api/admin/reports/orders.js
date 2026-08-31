@@ -1,5 +1,6 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
 import { toCsv } from "../../../../lib/csv";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 const COLUMNS = [
   { key: "orderId", label: "Order ID" },
@@ -15,7 +16,7 @@ const COLUMNS = [
   { key: "status", label: "Status" },
 ];
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   try {
@@ -38,3 +39,5 @@ export default async function handler(req, res) {
   res.setHeader("Content-Disposition", `attachment; filename="orders-report.csv"`);
   return res.status(200).send(csv);
 }
+
+export default withErrorHandling(handler);

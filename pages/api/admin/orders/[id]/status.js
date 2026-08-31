@@ -1,6 +1,7 @@
 import { requireAdmin, adminDb, VALID_SALE_STATUSES } from "../../../../../lib/firebaseAdmin";
 import { createProfitPool, reverseProfitPool } from "../../../../../lib/business";
 import { notifyUser } from "../../../../../lib/notify";
+import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
 const ALLOWED_STATUSES = [
   "under_review", "approved", "rejected", "processing",
@@ -19,7 +20,7 @@ const STATUS_MESSAGE = {
   refunded: (o) => `আপনার অর্ডার ${o.orderId} রিফান্ড করা হয়েছে।`,
 };
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   let decoded;
@@ -126,3 +127,5 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ ok: true });
 }
+
+export default withErrorHandling(handler);

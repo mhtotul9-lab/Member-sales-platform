@@ -1,9 +1,10 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
 import { getSettings } from "../../../../lib/business";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 const ALL_METHODS = ["bkash", "nagad", "rocket", "bank"];
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   let decoded;
   try {
     decoded = await requireAdmin(req);
@@ -42,3 +43,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default withErrorHandling(handler);

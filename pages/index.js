@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../contexts/AuthContext";
+import Logo from "../components/Logo";
 
 export default function Home() {
   const { user, profile, loading } = useAuth();
@@ -19,7 +20,7 @@ export default function Home() {
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="brand">সেলস<span>পার্টনার</span></div>
+        <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span>পার্টনার</span></div>
       </header>
       <div className="container">
         <div className="card" style={{ textAlign: "center", padding: "60px 28px" }}>

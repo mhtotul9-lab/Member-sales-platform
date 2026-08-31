@@ -1,6 +1,7 @@
 import { requireAuth, adminDb } from "../../../lib/firebaseAdmin";
+import { withErrorHandling } from "../../../lib/apiWrapper";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   let decoded;
@@ -22,3 +23,5 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ notifications, unreadCount });
 }
+
+export default withErrorHandling(handler);

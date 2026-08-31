@@ -1,8 +1,9 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 const STATUSES = ["active", "inactive", "out_of_stock", "archived"];
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   let decoded;
   try {
     decoded = await requireAdmin(req);
@@ -65,3 +66,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default withErrorHandling(handler);

@@ -1,7 +1,8 @@
 import { requireActiveMember, adminDb } from "../../../../lib/firebaseAdmin";
 import { getSettings, isMemberActive } from "../../../../lib/business";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   let auth;
@@ -41,3 +42,5 @@ export default async function handler(req, res) {
     transactions,
   });
 }
+
+export default withErrorHandling(handler);

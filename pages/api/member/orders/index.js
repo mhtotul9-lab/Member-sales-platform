@@ -1,11 +1,12 @@
 import { requireActiveMember, adminDb, nextOrderId } from "../../../../lib/firebaseAdmin";
 import { notifyAdmins } from "../../../../lib/notify";
+import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 function normalizePhone(phone) {
   return String(phone || "").replace(/[^0-9]/g, "");
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   let auth;
   try {
     auth = await requireActiveMember(req);
@@ -135,3 +136,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default withErrorHandling(handler);

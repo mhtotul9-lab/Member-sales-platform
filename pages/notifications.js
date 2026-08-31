@@ -4,6 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import Nav from "../components/Nav";
+import Logo from "../components/Logo";
 
 export default function Notifications() {
   const { user, profile, loading } = useAuth();
@@ -66,7 +67,7 @@ export default function Notifications() {
         <Nav role={profile.role} active="notifications" />
       ) : (
         <header className="topbar">
-          <a className="brand" href="/">সেলস<span>পার্টনার</span></a>
+          <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span>পার্টনার</span></a>
           <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
             লগ আউট
           </button>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import Logo from "../components/Logo";
 
 export default function Register() {
   const router = useRouter();
@@ -67,7 +68,7 @@ export default function Register() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/">সেলস<span>পার্টনার</span></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span>পার্টনার</span></a>
       </header>
       <div className="container" style={{ maxWidth: 520 }}>
         <div className="card">

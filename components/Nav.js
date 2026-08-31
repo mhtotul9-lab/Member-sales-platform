@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import { auth } from "../lib/firebase";
 import NotificationBell from "./NotificationBell";
+import Logo from "./Logo";
 
 export default function Nav({ role, active }) {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const links =
     role === "admin"
       ? [
@@ -28,35 +32,47 @@ export default function Nav({ role, active }) {
           { href: "/leaderboard", label: "লিডারবোর্ড", key: "leaderboard" },
         ];
 
+  function linkStyle(key) {
+    return { fontWeight: 600, fontSize: "0.92rem", color: active === key ? "var(--teal)" : "var(--ink-soft)" };
+  }
+
   return (
     <header className="topbar">
-      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-        <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"}>
-          সেলস<span>পার্টনার</span>
-          {role === "admin" && <span style={{ color: "var(--ink-soft)", fontWeight: 500 }}> · অ্যাডমিন</span>}
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Logo size={30} />
+          <span>
+            সেলস<span>পার্টনার</span>
+            {role === "admin" && <span style={{ color: "var(--ink-soft)", fontWeight: 500 }}> · অ্যাডমিন</span>}
+          </span>
         </a>
-        <nav style={{ display: "flex", gap: 18 }}>
-          {links.map((l) => (
-            <a
-              key={l.key}
-              href={l.href}
-              style={{
-                fontWeight: 600,
-                fontSize: "0.92rem",
-                color: active === l.key ? "var(--teal)" : "var(--ink-soft)",
-              }}
-            >
-              {l.label}
-            </a>
-          ))}
+        <nav className="topbar-links" style={{ display: "flex", gap: 18, marginLeft: 14 }}>
+          {links.map((l) => <a key={l.key} href={l.href} style={linkStyle(l.key)}>{l.label}</a>)}
         </nav>
       </div>
+
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <NotificationBell />
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>
+        <button
+          className="topbar-toggle"
+          aria-label="মেনু"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
       </div>
+
+      <nav className={`mobile-menu${menuOpen ? " open" : ""}`}>
+        {links.map((l) => (
+          <a key={l.key} href={l.href} style={linkStyle(l.key)} onClick={() => setMenuOpen(false)}>
+            {l.label}
+          </a>
+        ))}
+      </nav>
     </header>
   );
 }

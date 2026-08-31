@@ -111,7 +111,7 @@ export default function AdminOrderDetail() {
 
               <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "18px 0" }} />
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: "0.94rem" }}>
+              <div className="form-grid-2" style={{ fontSize: "0.94rem" }}>
                 <div><span className="muted">মেম্বার:</span> {order.memberName}</div>
                 <div><span className="muted">প্রোডাক্ট:</span> {order.productName} × {order.quantity}</div>
                 <div><span className="muted">অর্ডার মূল্য:</span> ৳{order.orderAmount}</div>

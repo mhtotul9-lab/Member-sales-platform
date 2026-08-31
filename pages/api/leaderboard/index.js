@@ -1,8 +1,9 @@
 import { requireActiveMember, adminDb, VALID_SALE_STATUSES } from "../../../lib/firebaseAdmin";
+import { withErrorHandling } from "../../../lib/apiWrapper";
 
 const RANGE_DAYS = { week: 7, month: 30, all: null };
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   try {
@@ -51,3 +52,5 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ leaderboard: rows });
 }
+
+export default withErrorHandling(handler);

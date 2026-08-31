@@ -1,5 +1,6 @@
 import { requireAuth, adminDb } from "../../../lib/firebaseAdmin";
 import { notifyAdmins } from "../../../lib/notify";
+import { withErrorHandling } from "../../../lib/apiWrapper";
 
 // Generates the next sequential MBR-##### id inside a transaction so two
 // simultaneous signups can never collide on the same number.
@@ -14,7 +15,7 @@ async function nextMemberId() {
   });
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   let decoded;
@@ -63,3 +64,5 @@ export default async function handler(req, res) {
 
   return res.status(201).json({ memberId });
 }
+
+export default withErrorHandling(handler);
