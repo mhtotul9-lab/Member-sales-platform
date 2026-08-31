@@ -47,6 +47,9 @@ export default function Pending() {
               <p className="muted">অ্যাডমিন অ্যাপ্রুভ করলেই আপনি লগইন করে ড্যাশবোর্ড ব্যবহার করতে পারবেন।</p>
             </>
           )}
+          <p style={{ marginTop: 18 }}>
+            <a href="/notifications" style={{ color: "var(--teal)", fontWeight: 600, fontSize: "0.9rem" }}>নোটিফিকেশন দেখুন</a>
+          </p>
         </div>
       </div>
     </div>

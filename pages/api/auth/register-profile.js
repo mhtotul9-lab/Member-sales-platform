@@ -1,4 +1,5 @@
 import { requireAuth, adminDb } from "../../../lib/firebaseAdmin";
+import { notifyAdmins } from "../../../lib/notify";
 
 // Generates the next sequential MBR-##### id inside a transaction so two
 // simultaneous signups can never collide on the same number.
@@ -52,6 +53,12 @@ export default async function handler(req, res) {
     totalOrders: 0,
     totalProfitEarned: 0,
     availableBalance: 0,
+  });
+
+  await notifyAdmins({
+    type: "new_registration",
+    message: `${fullName} নতুন রেজিস্ট্রেশন করেছে (${memberId}), অ্যাপ্রুভালের অপেক্ষায়।`,
+    link: "/admin/dashboard",
   });
 
   return res.status(201).json({ memberId });

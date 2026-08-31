@@ -1,6 +1,7 @@
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import { auth } from "../lib/firebase";
+import NotificationBell from "./NotificationBell";
 
 export default function Nav({ role, active }) {
   const router = useRouter();
@@ -11,12 +12,20 @@ export default function Nav({ role, active }) {
           { href: "/admin/products", label: "প্রোডাক্ট", key: "products" },
           { href: "/admin/orders", label: "অর্ডার", key: "orders" },
           { href: "/admin/profit", label: "প্রফিট", key: "profit" },
+          { href: "/admin/withdrawals", label: "উইথড্র", key: "withdrawals" },
+          { href: "/admin/trainings", label: "ট্রেনিং", key: "trainings" },
+          { href: "/admin/audit-logs", label: "অডিট লগ", key: "audit-logs" },
+          { href: "/admin/reports", label: "রিপোর্ট", key: "reports" },
+          { href: "/admin/settings", label: "সেটিংস", key: "settings" },
         ]
       : [
           { href: "/member/dashboard", label: "ড্যাশবোর্ড", key: "dashboard" },
           { href: "/member/products", label: "প্রোডাক্ট", key: "products" },
           { href: "/member/orders", label: "আমার অর্ডার", key: "orders" },
           { href: "/member/wallet", label: "ওয়ালেট", key: "wallet" },
+          { href: "/member/withdrawals", label: "উইথড্র", key: "withdrawals" },
+          { href: "/member/trainings", label: "ট্রেনিং", key: "trainings" },
+          { href: "/leaderboard", label: "লিডারবোর্ড", key: "leaderboard" },
         ];
 
   return (
@@ -42,9 +51,12 @@ export default function Nav({ role, active }) {
           ))}
         </nav>
       </div>
-      <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
-        লগ আউট
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <NotificationBell />
+        <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
+          লগ আউট
+        </button>
+      </div>
     </header>
   );
 }

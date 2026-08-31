@@ -31,7 +31,10 @@ export default function MemberDashboard() {
           </p>
           <a className="btn btn-teal" href="/member/products">প্রোডাক্ট ব্রাউজ করুন</a>{" "}
           <a className="btn btn-outline" href="/member/orders">আমার অর্ডার দেখুন</a>{" "}
-          <a className="btn btn-outline" href="/member/wallet">ওয়ালেট দেখুন</a>
+          <a className="btn btn-outline" href="/member/wallet">ওয়ালেট দেখুন</a>{" "}
+          <a className="btn btn-outline" href="/member/withdrawals">উইথড্র করুন</a>{" "}
+          <a className="btn btn-outline" href="/leaderboard">লিডারবোর্ড</a>{" "}
+          <a className="btn btn-outline" href="/member/trainings">ট্রেনিং</a>
         </div>
       </div>
     </div>

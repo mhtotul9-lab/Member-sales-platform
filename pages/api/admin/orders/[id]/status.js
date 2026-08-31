@@ -1,10 +1,23 @@
 import { requireAdmin, adminDb, VALID_SALE_STATUSES } from "../../../../../lib/firebaseAdmin";
 import { createProfitPool, reverseProfitPool } from "../../../../../lib/business";
+import { notifyUser } from "../../../../../lib/notify";
 
 const ALLOWED_STATUSES = [
   "under_review", "approved", "rejected", "processing",
   "delivered", "completed", "cancelled", "returned", "refunded",
 ];
+
+const STATUS_MESSAGE = {
+  under_review: (o) => `আপনার অর্ডার ${o.orderId} রিভিউতে নেওয়া হয়েছে।`,
+  approved: (o) => `আপনার অর্ডার ${o.orderId} অ্যাপ্রুভ হয়েছে!`,
+  rejected: (o) => `আপনার অর্ডার ${o.orderId} রিজেক্ট করা হয়েছে।`,
+  processing: (o) => `আপনার অর্ডার ${o.orderId} প্রসেসিং-এ আছে।`,
+  delivered: (o) => `আপনার অর্ডার ${o.orderId} ডেলিভার হয়েছে।`,
+  completed: (o) => `আপনার অর্ডার ${o.orderId} সম্পন্ন হয়েছে।`,
+  cancelled: (o) => `আপনার অর্ডার ${o.orderId} বাতিল করা হয়েছে।`,
+  returned: (o) => `আপনার অর্ডার ${o.orderId} রিটার্ন হিসেবে চিহ্নিত হয়েছে।`,
+  refunded: (o) => `আপনার অর্ডার ${o.orderId} রিফান্ড করা হয়েছে।`,
+};
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -63,7 +76,7 @@ export default async function handler(req, res) {
         });
       }
 
-      return { oldStatus, memberId: order.memberId };
+      return { oldStatus, memberId: order.memberId, orderId: order.orderId };
     });
   } catch (err) {
     return res.status(err.statusCode || 500).json({ error: err.message });
@@ -79,6 +92,12 @@ export default async function handler(req, res) {
     after: { status },
     reason: reason || null,
     timestamp: now,
+  });
+
+  await notifyUser(result.memberId, {
+    type: "order_status",
+    message: (STATUS_MESSAGE[status] || (() => `আপনার অর্ডার ${result.orderId} স্ট্যাটাস পরিবর্তন হয়েছে: ${status}`))({ orderId: result.orderId }),
+    link: "/member/orders",
   });
 
   // Profit sharing runs after the transition is safely committed. It touches

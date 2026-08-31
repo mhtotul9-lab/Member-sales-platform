@@ -1,4 +1,5 @@
 import { requireActiveMember, adminDb, nextOrderId } from "../../../../lib/firebaseAdmin";
+import { notifyAdmins } from "../../../../lib/notify";
 
 function normalizePhone(phone) {
   return String(phone || "").replace(/[^0-9]/g, "");
@@ -122,6 +123,13 @@ export default async function handler(req, res) {
     };
 
     const ref = await adminDb.collection("orders").add(order);
+
+    await notifyAdmins({
+      type: "new_order",
+      message: `${profile.fullName} নতুন অর্ডার সাবমিট করেছে (${orderId})।`,
+      link: `/admin/orders/${ref.id}`,
+    });
+
     return res.status(201).json({ id: ref.id, orderId });
   }
 
