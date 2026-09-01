@@ -107,6 +107,16 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       <div className="field">
         <label htmlFor="mainImageUrl">মেইন ছবির URL</label>
         <input id="mainImageUrl" value={form.mainImageUrl} onChange={(e) => update("mainImageUrl", e.target.value)} placeholder="https://..." />
+        {form.mainImageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={form.mainImageUrl}
+            alt="প্রিভিউ"
+            style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, marginTop: 10, border: "1px solid var(--line)" }}
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+            onLoad={(e) => { e.currentTarget.style.display = "block"; }}
+          />
+        )}
       </div>
       <div className="field">
         <label htmlFor="imageUrlsText">আরও ছবির URL (প্রতি লাইনে একটা করে)</label>

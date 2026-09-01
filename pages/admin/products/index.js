@@ -65,12 +65,33 @@ export default function AdminProducts() {
             const st = STATUS_LABEL[p.status] || STATUS_LABEL.inactive;
             return (
               <div className="list-row" key={p.id}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>
-                    {p.name} <span className="muted">· ৳{p.sellingPrice}</span>
-                  </div>
-                  <div className="muted">
-                    {p.category || "ক্যাটাগরি নেই"} · প্রফিট ৳{p.profit}
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  {p.mainImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.mainImageUrl}
+                      alt={p.name}
+                      style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0, border: "1px solid var(--line)" }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 56, height: 56, borderRadius: 8, flexShrink: 0,
+                        background: "var(--paper)", border: "1px solid var(--line)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "var(--ink-soft)", fontSize: "0.7rem", textAlign: "center",
+                      }}
+                    >
+                      ছবি নেই
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 600 }}>
+                      {p.name} <span className="muted">· ৳{p.sellingPrice}</span>
+                    </div>
+                    <div className="muted">
+                      {p.category || "ক্যাটাগরি নেই"} · প্রফিট ৳{p.profit}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
