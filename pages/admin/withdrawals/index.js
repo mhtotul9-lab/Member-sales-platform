@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 const STATUS_LABEL = {
   pending: { text: "পেন্ডিং", cls: "stamp-pending" },
@@ -71,7 +72,7 @@ export default function AdminWithdrawals() {
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 20 }}>উইথড্র ম্যানেজমেন্ট</h1>
           {error && <p className="error-text">{error}</p>}
-          {withdrawals === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {withdrawals === null && !error && <Loading />}
           {withdrawals && withdrawals.length === 0 && <div className="empty-state">কোনো উইথড্র রিকোয়েস্ট নেই।</div>}
 
           {withdrawals && withdrawals.map((w) => {

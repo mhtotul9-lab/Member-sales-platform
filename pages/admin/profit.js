@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import Loading from "../../components/Loading";
 
 export default function AdminProfit() {
   const { user, profile, loading } = useAuth();
@@ -41,7 +42,7 @@ export default function AdminProfit() {
       <Nav role="admin" active="profit" />
       <div className="container">
         {error && <p className="error-text">{error}</p>}
-        {!data && !error && <p className="muted">লোড হচ্ছে...</p>}
+        {!data && !error && <Loading />}
 
         {data && (
           <>

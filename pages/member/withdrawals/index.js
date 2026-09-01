@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 const METHOD_LABELS = {
   bkash: "বিকাশ", nagad: "নগদ", rocket: "রকেট", bank: "ব্যাংক ট্রান্সফার",
@@ -118,7 +119,7 @@ export default function MemberWithdrawals() {
 
         <div className="card">
           <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>উইথড্র হিস্ট্রি</h2>
-          {withdrawals === null && <p className="muted">লোড হচ্ছে...</p>}
+          {withdrawals === null && <Loading />}
           {withdrawals && withdrawals.length === 0 && <div className="empty-state">এখনো কোনো উইথড্র রিকোয়েস্ট নেই।</div>}
           {withdrawals && withdrawals.map((w) => {
             const st = STATUS_LABEL[w.status] || STATUS_LABEL.pending;

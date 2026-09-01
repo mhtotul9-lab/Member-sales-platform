@@ -5,6 +5,7 @@ import { auth } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import Nav from "../components/Nav";
 import Logo from "../components/Logo";
+import Loading from "../components/Loading";
 
 export default function Notifications() {
   const { user, profile, loading } = useAuth();
@@ -83,7 +84,7 @@ export default function Notifications() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {notifications === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {notifications === null && !error && <Loading />}
           {notifications && notifications.length === 0 && <div className="empty-state">কোনো নোটিফিকেশন নেই।</div>}
 
           {notifications && notifications.map((n) => (

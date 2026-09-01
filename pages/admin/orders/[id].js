@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS, RISK_FLAG_LABELS } from "../../../lib/orderStatus";
+import Loading from "../../../components/Loading";
 
 const ACTIONS = [
   { status: "under_review", label: "রিভিউতে নিন", cls: "btn-outline" },
@@ -86,7 +87,7 @@ export default function AdminOrderDetail() {
       <Nav role="admin" active="orders" />
       <div className="container" style={{ maxWidth: 680 }}>
         {error && <p className="error-text">{error}</p>}
-        {!order && !error && <p className="muted">লোড হচ্ছে...</p>}
+        {!order && !error && <Loading />}
 
         {order && (
           <>

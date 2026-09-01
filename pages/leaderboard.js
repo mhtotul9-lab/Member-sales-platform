@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../contexts/AuthContext";
 import Nav from "../components/Nav";
+import Loading from "../components/Loading";
 
 const TABS = [
   { value: "week", label: "সাপ্তাহিক" },
@@ -61,7 +62,7 @@ export default function Leaderboard() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {rows === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {rows === null && !error && <Loading />}
           {rows && rows.length === 0 && <div className="empty-state">এই সময়ে কোনো ভ্যালিড সেল নেই।</div>}
 
           {rows && rows.map((r) => (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 function CopyButton({ text, label }) {
   const [copied, setCopied] = useState(false);
@@ -60,7 +61,7 @@ export default function MemberProductDetail() {
       <Nav role={profile.role} active="products" />
       <div className="container" style={{ maxWidth: 720 }}>
         {error && <p className="error-text">{error}</p>}
-        {!product && !error && <p className="muted">লোড হচ্ছে...</p>}
+        {!product && !error && <Loading />}
 
         {product && (
           <>

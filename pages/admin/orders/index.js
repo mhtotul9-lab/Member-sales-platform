@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS, RISK_FLAG_LABELS } from "../../../lib/orderStatus";
+import Loading from "../../../components/Loading";
 
 const FILTERS = [
   { value: "", label: "সব" },
@@ -67,7 +68,7 @@ export default function AdminOrders() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {orders === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {orders === null && !error && <Loading />}
           {orders && orders.length === 0 && <div className="empty-state">এই ফিল্টারে কোনো অর্ডার নেই।</div>}
 
           {orders && orders.map((o) => {

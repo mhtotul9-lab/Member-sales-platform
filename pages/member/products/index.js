@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 export default function MemberProducts() {
   const { user, profile, loading } = useAuth();
@@ -74,7 +75,7 @@ export default function MemberProducts() {
         </div>
 
         {error && <p className="error-text">{error}</p>}
-        {products === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+        {products === null && !error && <Loading />}
         {products && filtered.length === 0 && <div className="empty-state">কোনো প্রোডাক্ট পাওয়া যায়নি।</div>}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>

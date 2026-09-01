@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 const STATUS_LABEL = {
   active: { text: "অ্যাক্টিভ", cls: "stamp-active" },
@@ -57,7 +58,7 @@ export default function AdminProducts() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {products === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {products === null && !error && <Loading />}
           {products && products.length === 0 && <div className="empty-state">এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।</div>}
 
           {products && products.map((p) => {

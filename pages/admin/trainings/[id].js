@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 export default function AdminTrainingDetail() {
   const { user, profile, loading } = useAuth();
@@ -66,7 +67,7 @@ export default function AdminTrainingDetail() {
           <h1 style={{ fontSize: "1.25rem", marginBottom: 6 }}>ট্রেনিং এডিট করুন</h1>
           {completedCount !== null && <p className="muted" style={{ marginBottom: 20 }}>{completedCount} জন মেম্বার সম্পন্ন করেছে</p>}
 
-          {!form && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {!form && !error && <Loading />}
           {error && <p className="error-text">{error}</p>}
 
           {form && (

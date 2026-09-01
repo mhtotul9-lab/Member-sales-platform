@@ -36,6 +36,7 @@ export default function NotificationBell() {
       নোটিফিকেশন
       {unreadCount > 0 && (
         <span
+          className="notif-badge"
           style={{
             position: "absolute", top: -6, right: -6,
             background: "var(--red)", color: "#fff",

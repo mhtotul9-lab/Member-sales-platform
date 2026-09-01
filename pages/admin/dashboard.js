@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import Loading from "../../components/Loading";
 
 export default function AdminDashboard() {
   const { user, profile, loading } = useAuth();
@@ -69,7 +70,7 @@ export default function AdminDashboard() {
 
           {fetchError && <p className="error-text">{fetchError}</p>}
 
-          {members === null && !fetchError && <p className="muted">লোড হচ্ছে...</p>}
+          {members === null && !fetchError && <Loading />}
 
           {members && members.length === 0 && (
             <div className="empty-state">এই মুহূর্তে কোনো পেন্ডিং রেজিস্ট্রেশন নেই।</div>

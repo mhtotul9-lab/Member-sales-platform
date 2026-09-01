@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import Loading from "../../components/Loading";
 
 const ENTITY_FILTERS = [
   { value: "", label: "সব" },
@@ -74,7 +75,7 @@ export default function AuditLogs() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {logs === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {logs === null && !error && <Loading />}
           {logs && logs.length === 0 && <div className="empty-state">কোনো লগ পাওয়া যায়নি।</div>}
 
           {logs && logs.map((log) => (

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 const STATUS_LABEL = {
   not_started: { text: "শুরু হয়নি", cls: "stamp-rejected" },
@@ -67,7 +68,7 @@ export default function MemberTrainings() {
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 16 }}>ট্রেনিং</h1>
           {error && <p className="error-text">{error}</p>}
-          {trainings === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {trainings === null && !error && <Loading />}
           {trainings && trainings.length === 0 && <div className="empty-state">এখনো কোনো ট্রেনিং যোগ করা হয়নি।</div>}
 
           {trainings && trainings.map((t) => {

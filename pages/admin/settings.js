@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import Loading from "../../components/Loading";
 
 const METHOD_LABELS = { bkash: "বিকাশ", nagad: "নগদ", rocket: "রকেট", bank: "ব্যাংক ট্রান্সফার" };
 
@@ -81,7 +82,7 @@ export default function AdminSettings() {
           <h1 style={{ fontSize: "1.25rem", marginBottom: 6 }}>সেটিংস</h1>
           <p className="muted" style={{ marginBottom: 20 }}>এই মানগুলো সাথে সাথেই পুরো সিস্টেমে কার্যকর হবে।</p>
 
-          {!form && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {!form && !error && <Loading />}
           {error && <p className="error-text">{error}</p>}
 
           {form && (

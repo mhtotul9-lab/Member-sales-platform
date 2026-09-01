@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS } from "../../../lib/orderStatus";
+import Loading from "../../../components/Loading";
 
 export default function MemberOrders() {
   const { user, profile, loading } = useAuth();
@@ -47,7 +48,7 @@ export default function MemberOrders() {
           </div>
 
           {error && <p className="error-text">{error}</p>}
-          {orders === null && !error && <p className="muted">লোড হচ্ছে...</p>}
+          {orders === null && !error && <Loading />}
           {orders && orders.length === 0 && <div className="empty-state">এখনো কোনো অর্ডার সাবমিট করা হয়নি।</div>}
 
           {orders && orders.map((o) => {

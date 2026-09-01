@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
+import Loading from "../../../components/Loading";
 
 export default function AdminTrainings() {
   const { user, profile, loading } = useAuth();
@@ -92,7 +93,7 @@ export default function AdminTrainings() {
 
         <div className="card">
           <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>সব ট্রেনিং</h2>
-          {trainings === null && <p className="muted">লোড হচ্ছে...</p>}
+          {trainings === null && <Loading />}
           {trainings && trainings.length === 0 && <div className="empty-state">এখনো কোনো ট্রেনিং যোগ করা হয়নি।</div>}
           {trainings && trainings.map((t) => (
             <div className="list-row" key={t.id}>

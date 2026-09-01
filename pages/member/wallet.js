@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import Loading from "../../components/Loading";
 
 const TXN_LABEL = {
   profit_earned: { text: "প্রফিট", sign: "+" },
@@ -45,7 +46,7 @@ export default function MemberWallet() {
       <Nav role={profile.role} active="wallet" />
       <div className="container">
         {error && <p className="error-text">{error}</p>}
-        {!wallet && !error && <p className="muted">লোড হচ্ছে...</p>}
+        {!wallet && !error && <Loading />}
 
         {wallet && (
           <>

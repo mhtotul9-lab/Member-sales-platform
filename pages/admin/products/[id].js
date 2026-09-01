@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import ProductForm from "../../../components/ProductForm";
+import Loading from "../../../components/Loading";
 
 export default function EditProduct() {
   const { user, profile, loading } = useAuth();
@@ -64,7 +65,7 @@ export default function EditProduct() {
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 20 }}>প্রোডাক্ট এডিট করুন</h1>
           {loadError && <p className="error-text">{loadError}</p>}
-          {!product && !loadError && <p className="muted">লোড হচ্ছে...</p>}
+          {!product && !loadError && <Loading />}
           {product && (
             <ProductForm initial={product} submitting={submitting} error={error} onSubmit={handleSubmit} submitLabel="পরিবর্তন সেভ করুন" />
           )}
