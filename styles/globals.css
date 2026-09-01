@@ -44,19 +44,57 @@ a { color: inherit; }
 .topbar {
   border-bottom: 1px solid var(--line);
   background: var(--surface);
-  padding: 16px 24px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.topbar .brand {
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.topbar .brand span { color: var(--teal); }
+.brand-accent { color: var(--teal); }
+.brand-role { color: var(--ink-soft); font-weight: 500; }
+
+.topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.nav-link-active { color: var(--teal); }
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
 .container {
   max-width: 880px;
@@ -180,16 +218,20 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 .mobile-menu {
   display: none;
+  order: 3;
+  width: 100%;
 }
 
 /* --- Mobile breakpoint --- */
-@media (max-width: 760px) {
+@media (max-width: 860px) {
   .container {
-    padding: 22px 14px 60px;
+    padding: 20px 14px 60px;
   }
 
   .card {
@@ -198,10 +240,10 @@ a { color: inherit; }
 
   .topbar {
     padding: 12px 16px;
-    flex-wrap: wrap;
   }
 
-  .topbar-links {
+  .topbar-links,
+  .topbar-actions {
     display: none;
   }
 
@@ -213,17 +255,29 @@ a { color: inherit; }
     display: flex;
     flex-direction: column;
     width: 100%;
-    order: 3;
     margin-top: 14px;
     padding-top: 14px;
     border-top: 1px solid var(--line);
-    gap: 4px;
+    gap: 2px;
   }
 
-  .mobile-menu a {
-    padding: 10px 4px;
-    font-weight: 600;
+  .mobile-menu .nav-link {
+    padding: 11px 6px;
     font-size: 0.95rem;
+    border-radius: 6px;
+  }
+
+  .mobile-menu .nav-link-active {
+    background: var(--teal-soft);
+  }
+
+  .mobile-menu-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
   }
 
   .form-grid-2 {
@@ -235,4 +289,11 @@ a { color: inherit; }
     flex-wrap: wrap;
     gap: 8px;
   }
+
+  h1 { font-size: 1.15rem !important; }
+}
+
+@media (max-width: 420px) {
+  .topbar-left { gap: 10px; }
+  .brand { font-size: 0.95rem; }
 }

@@ -29,8 +29,8 @@ export default function AdminProducts() {
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/admin/products", { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error("লোড করা যায়নি।");
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "লোড করা যায়নি।");
       setProducts(body.products);
     } catch (err) {
       setError(err.message);

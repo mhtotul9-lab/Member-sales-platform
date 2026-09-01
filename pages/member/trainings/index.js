@@ -48,7 +48,8 @@ export default function MemberTrainings() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("আপডেট করা যায়নি।");
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "আপডেট করা যায়নি।");
       load();
     } catch (err) {
       setError(err.message);

@@ -28,7 +28,10 @@ export default function AdminReports() {
     try {
       const token = await user.getIdToken();
       const res = await fetch(report.url, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error("রিপোর্ট তৈরি করা যায়নি।");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "রিপোর্ট তৈরি করা যায়নি।");
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

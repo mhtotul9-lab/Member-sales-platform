@@ -32,46 +32,53 @@ export default function Nav({ role, active }) {
           { href: "/leaderboard", label: "লিডারবোর্ড", key: "leaderboard" },
         ];
 
-  function linkStyle(key) {
-    return { fontWeight: 600, fontSize: "0.92rem", color: active === key ? "var(--teal)" : "var(--ink-soft)" };
+  function linkClass(key) {
+    return active === key ? "nav-link nav-link-active" : "nav-link";
   }
 
   return (
     <header className="topbar">
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="topbar-left">
+        <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"}>
           <Logo size={30} />
           <span>
-            সেলস<span>পার্টনার</span>
-            {role === "admin" && <span style={{ color: "var(--ink-soft)", fontWeight: 500 }}> · অ্যাডমিন</span>}
+            সেলস<span className="brand-accent">পার্টনার</span>
+            {role === "admin" && <span className="brand-role"> · অ্যাডমিন</span>}
           </span>
         </a>
-        <nav className="topbar-links" style={{ display: "flex", gap: 18, marginLeft: 14 }}>
-          {links.map((l) => <a key={l.key} href={l.href} style={linkStyle(l.key)}>{l.label}</a>)}
+        <nav className="topbar-links">
+          {links.map((l) => <a key={l.key} href={l.href} className={linkClass(l.key)}>{l.label}</a>)}
         </nav>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="topbar-actions">
         <NotificationBell />
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>
-        <button
-          className="topbar-toggle"
-          aria-label="মেনু"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
       </div>
+
+      <button
+        className="topbar-toggle"
+        aria-label="মেনু"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        {menuOpen ? "✕" : "☰"}
+      </button>
 
       <nav className={`mobile-menu${menuOpen ? " open" : ""}`}>
         {links.map((l) => (
-          <a key={l.key} href={l.href} style={linkStyle(l.key)} onClick={() => setMenuOpen(false)}>
+          <a key={l.key} href={l.href} className={linkClass(l.key)} onClick={() => setMenuOpen(false)}>
             {l.label}
           </a>
         ))}
+        <div className="mobile-menu-actions">
+          <NotificationBell />
+          <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
+            লগ আউট
+          </button>
+        </div>
       </nav>
     </header>
   );

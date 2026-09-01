@@ -25,8 +25,8 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/members?status=pending", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("লোড করা যায়নি।");
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "লোড করা যায়নি।");
       setMembers(body.members);
     } catch (err) {
       setFetchError(err.message);
@@ -47,7 +47,8 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error("আপডেট করা যায়নি।");
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "আপডেট করা যায়নি।");
       setMembers((list) => list.filter((m) => m.uid !== uid));
     } catch (err) {
       setFetchError(err.message);
