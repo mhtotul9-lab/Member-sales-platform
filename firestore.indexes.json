@@ -54,6 +54,10 @@
     { "collectionGroup": "auditLogs", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "entity", "order": "ASCENDING" },
       { "fieldPath": "timestamp", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "transactions", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "memberId", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
     ]}
   ],
   "fieldOverrides": []
