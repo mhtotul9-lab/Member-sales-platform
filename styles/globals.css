@@ -404,3 +404,26 @@ a.card:hover {
 .notif-badge {
   animation: pulseRing 1.8s infinite;
 }
+
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+@keyframes feedFlash {
+  0% { background: var(--teal-soft); }
+  100% { background: transparent; }
+}
+
+.feed-item-new {
+  animation: feedFlash 1.2s ease;
+}

@@ -33,6 +33,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // salesFeed/{id} — a deliberately stripped-down "someone just made a
+    // sale" feed (product + image + buyer's first-two-letters only, never
+    // the seller's full identity). Safe for every signed-in member to read
+    // live. Only ever written by API routes via the Admin SDK.
+    match /salesFeed/{id} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     // Everything else defaults to admin-only / server-only until each
     // later phase (products, orders, wallets, ...) adds its own rules.
     match /{document=**} {

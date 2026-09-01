@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
+import AdminLiveSalesFeed from "../../components/AdminLiveSalesFeed";
 
 export default function AdminDashboard() {
   const { user, profile, loading } = useAuth();
@@ -64,6 +65,7 @@ export default function AdminDashboard() {
     <div className="shell">
       <Nav role="admin" active="members" />
       <div className="container">
+        <AdminLiveSalesFeed />
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 4 }}>মেম্বার অ্যাপ্রুভাল</h1>
           <p className="muted" style={{ marginBottom: 20 }}>নতুন রেজিস্ট্রেশনগুলো এখানে রিভিউ করুন।</p>

@@ -1,5 +1,5 @@
 import { requireAdmin, adminDb, VALID_SALE_STATUSES } from "../../../../../lib/firebaseAdmin";
-import { createProfitPool, reverseProfitPool } from "../../../../../lib/business";
+import { createProfitPool, reverseProfitPool, recordSalesFeedEntry } from "../../../../../lib/business";
 import { notifyUser } from "../../../../../lib/notify";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
@@ -114,6 +114,7 @@ async function handler(req, res) {
       const freshOrder = { id: freshSnap.id, ...freshSnap.data() };
       if (!wasValid && isValid) {
         await createProfitPool(id, freshOrder);
+        await recordSalesFeedEntry(freshOrder);
       } else if (wasValid && !isValid) {
         await reverseProfitPool(id, freshOrder);
       }
