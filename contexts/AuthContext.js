@@ -1,18 +1,22 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
 const AuthContext = createContext({ user: null, profile: null, loading: true });
+
+const HEARTBEAT_MS = 50 * 1000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const loginRecordedRef = useRef(false);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+      loginRecordedRef.current = false;
       if (!firebaseUser) {
         setProfile(null);
         setLoading(false);
@@ -29,6 +33,33 @@ export function AuthProvider({ children }) {
     });
     return () => unsubDoc();
   }, [user]);
+
+  // Lightweight presence: heartbeats `lastActiveAt` every ~50s while a tab
+  // is open (plus on tab focus), and stamps `lastLoginAt` once per sign-in.
+  // This is an approximation, not an instant presence system — a member
+  // reads as "online" if their last heartbeat was within the last couple
+  // of minutes. Simple and needs no extra Firebase product beyond Firestore.
+  useEffect(() => {
+    if (!user || !profile) return;
+
+    const memberRef = doc(db, "members", user.uid);
+    const nowIso = () => new Date().toISOString();
+
+    if (!loginRecordedRef.current) {
+      loginRecordedRef.current = true;
+      setDoc(memberRef, { lastLoginAt: nowIso(), lastActiveAt: nowIso() }, { merge: true }).catch(() => {});
+    }
+
+    const beat = () => setDoc(memberRef, { lastActiveAt: nowIso() }, { merge: true }).catch(() => {});
+    const interval = setInterval(beat, HEARTBEAT_MS);
+    const onVisible = () => { if (document.visibilityState === "visible") beat(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [user, profile]);
 
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>

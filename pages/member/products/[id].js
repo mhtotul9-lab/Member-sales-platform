@@ -26,6 +26,43 @@ function CopyButton({ text, label }) {
   );
 }
 
+function DownloadButton({ url, filename, label, getToken }) {
+  const [state, setState] = useState("idle"); // idle | working | done | error
+
+  async function handleDownload() {
+    setState("working");
+    try {
+      const token = await getToken();
+      const proxyUrl = `/api/member/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+      const res = await fetch(proxyUrl, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "ডাউনলোড করা যায়নি।");
+      }
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      setState("done");
+      setTimeout(() => setState("idle"), 1500);
+    } catch {
+      setState("error");
+      setTimeout(() => setState("idle"), 2000);
+    }
+  }
+
+  return (
+    <button type="button" className="btn btn-outline btn-sm" disabled={state === "working"} onClick={handleDownload}>
+      {state === "working" ? "ডাউনলোড হচ্ছে..." : state === "done" ? "ডাউনলোড হয়েছে ✓" : state === "error" ? "সমস্যা হয়েছে, আবার চেষ্টা করুন" : label}
+    </button>
+  );
+}
+
 export default function MemberProductDetail() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
@@ -56,6 +93,9 @@ export default function MemberProductDetail() {
 
   if (loading || !profile) return null;
 
+  const getToken = () => user.getIdToken();
+  const slug = (product?.name || "product").replace(/[^a-zA-Z0-9\u0980-\u09FF]+/g, "-").slice(0, 40);
+
   return (
     <div className="shell">
       <Nav role={profile.role} active="products" />
@@ -77,13 +117,16 @@ export default function MemberProductDetail() {
             </div>
 
             <div className="card" style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>মার্কেটিং মিডিয়া</h2>
+              <h2 style={{ fontSize: "1.05rem", marginBottom: 4 }}>মার্কেটিং মিডিয়া</h2>
+              <p className="muted" style={{ marginBottom: 14, fontSize: "0.85rem" }}>
+                বাটনে ক্লিক করলেই ছবি সরাসরি ডাউনলোড হয়ে যাবে।
+              </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 {product.mainImageUrl && (
-                  <a className="btn btn-outline btn-sm" href={product.mainImageUrl} target="_blank" rel="noreferrer">মেইন ছবি দেখুন / ডাউনলোড</a>
+                  <DownloadButton url={product.mainImageUrl} filename={`${slug}-main.jpg`} label="মেইন ছবি ডাউনলোড" getToken={getToken} />
                 )}
                 {(product.imageUrls || []).map((url, i) => (
-                  <a key={i} className="btn btn-outline btn-sm" href={url} target="_blank" rel="noreferrer">ছবি {i + 1} দেখুন / ডাউনলোড</a>
+                  <DownloadButton key={i} url={url} filename={`${slug}-${i + 1}.jpg`} label={`ছবি ${i + 1} ডাউনলোড`} getToken={getToken} />
                 ))}
                 {product.videoUrl && (
                   <a className="btn btn-outline btn-sm" href={product.videoUrl} target="_blank" rel="noreferrer">ভিডিও দেখুন</a>

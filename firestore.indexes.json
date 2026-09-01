@@ -39,6 +39,10 @@
       { "fieldPath": "status", "order": "ASCENDING" },
       { "fieldPath": "approvedAt", "order": "ASCENDING" }
     ]},
+    { "collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "approvedAt", "order": "DESCENDING" }
+    ]},
     { "collectionGroup": "withdrawals", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "memberId", "order": "ASCENDING" },
       { "fieldPath": "requestedAt", "order": "DESCENDING" }

@@ -59,7 +59,7 @@ async function handler(req, res) {
   await notifyAdmins({
     type: "new_registration",
     message: `${fullName} নতুন রেজিস্ট্রেশন করেছে (${memberId}), অ্যাপ্রুভালের অপেক্ষায়।`,
-    link: "/admin/dashboard",
+    link: "/admin/members",
   });
 
   return res.status(201).json({ memberId });

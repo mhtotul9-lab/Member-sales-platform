@@ -5,12 +5,22 @@ import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
 import AdminLiveSalesFeed from "../../components/AdminLiveSalesFeed";
 
-export default function AdminDashboard() {
+const ORDER_BUCKETS = [
+  { label: "রিভিউ বাকি", keys: ["submitted", "under_review"], cls: "stamp-pending" },
+  { label: "ভ্যালিড সেল", keys: ["approved", "processing", "delivered", "completed"], cls: "stamp-active" },
+  { label: "রিজেক্ট/বাতিল", keys: ["rejected", "cancelled"], cls: "stamp-rejected" },
+  { label: "রিটার্ন/রিফান্ড", keys: ["returned", "refunded"], cls: "stamp-rejected" },
+];
+
+function sumKeys(counts, keys) {
+  return keys.reduce((sum, k) => sum + (counts[k] || 0), 0);
+}
+
+export default function AdminOverview() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
-  const [members, setMembers] = useState(null);
-  const [fetchError, setFetchError] = useState("");
-  const [actingOn, setActingOn] = useState(null);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (loading) return;
@@ -19,91 +29,106 @@ export default function AdminDashboard() {
     if (profile.role !== "admin") { router.replace("/member/dashboard"); return; }
   }, [user, profile, loading, router]);
 
-  const loadPending = useCallback(async () => {
+  const load = useCallback(async () => {
     if (!user) return;
-    setFetchError("");
+    setError("");
     try {
       const token = await user.getIdToken();
-      const res = await fetch("/api/admin/members?status=pending", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch("/api/admin/overview", { headers: { Authorization: `Bearer ${token}` } });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "লোড করা যায়নি।");
-      setMembers(body.members);
+      setData(body);
     } catch (err) {
-      setFetchError(err.message);
+      setError(err.message);
     }
   }, [user]);
 
   useEffect(() => {
-    if (profile?.role === "admin" && profile.status === "active") loadPending();
-  }, [profile, loadPending]);
-
-  async function act(uid, status) {
-    if (!user) return;
-    setActingOn(uid);
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch(`/api/admin/members/${uid}/status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || "আপডেট করা যায়নি।");
-      setMembers((list) => list.filter((m) => m.uid !== uid));
-    } catch (err) {
-      setFetchError(err.message);
-    } finally {
-      setActingOn(null);
-    }
-  }
+    if (profile?.role === "admin" && profile.status === "active") load();
+  }, [profile, load]);
 
   if (loading || !profile) return null;
 
   return (
     <div className="shell">
-      <Nav role="admin" active="members" />
+      <Nav role="admin" active="overview" />
       <div className="container">
-        <AdminLiveSalesFeed />
-        <div className="card">
-          <h1 style={{ fontSize: "1.25rem", marginBottom: 4 }}>মেম্বার অ্যাপ্রুভাল</h1>
-          <p className="muted" style={{ marginBottom: 20 }}>নতুন রেজিস্ট্রেশনগুলো এখানে রিভিউ করুন।</p>
+        {error && <p className="error-text">{error}</p>}
+        {!data && !error && <Loading />}
 
-          {fetchError && <p className="error-text">{fetchError}</p>}
+        {data && (
+          <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 20 }}>
+              <SummaryCard label="মোট সেল" value={`৳${data.totalSales.toFixed(2)}`} />
+              <SummaryCard label="কোম্পানির প্রফিট" value={`৳${data.totalCompanyProfit.toFixed(2)}`} />
+              <SummaryCard label="বিতরণ করা প্রফিট" value={`৳${data.totalDistributedProfit.toFixed(2)}`} />
+              <SummaryCard label="মোট উইথড্র (পেইড)" value={`৳${data.totalWithdrawn.toFixed(2)}`} />
+              <SummaryCard label="পেন্ডিং উইথড্র" value={`৳${data.pendingWithdrawalAmount.toFixed(2)}`} accent="gold" />
+            </div>
 
-          {members === null && !fetchError && <Loading />}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 20 }}>
+              <SummaryCard label="মোট মেম্বার (অ্যাপ্রুভড)" value={data.memberStatusCounts.active} />
+              <SummaryCard label="সেলস-অ্যাক্টিভ মেম্বার" value={data.activeSalesMemberCount} accent="teal" />
+              <SummaryCard label="পেন্ডিং রেজিস্ট্রেশন" value={data.memberStatusCounts.pending} accent="gold" />
+              <SummaryCard label="সাসপেন্ডেড" value={data.memberStatusCounts.suspended} accent="red" />
+            </div>
 
-          {members && members.length === 0 && (
-            <div className="empty-state">এই মুহূর্তে কোনো পেন্ডিং রেজিস্ট্রেশন নেই।</div>
-          )}
-
-          {members && members.map((m) => (
-            <div className="list-row" key={m.uid}>
-              <div>
-                <div style={{ fontWeight: 600 }}>{m.fullName} <span className="muted">· {m.memberId}</span></div>
-                <div className="muted">{m.email} · {m.phone}</div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  className="btn btn-teal btn-sm"
-                  disabled={actingOn === m.uid}
-                  onClick={() => act(m.uid, "active")}
-                >
-                  অ্যাপ্রুভ
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  disabled={actingOn === m.uid}
-                  onClick={() => act(m.uid, "rejected")}
-                >
-                  রিজেক্ট
-                </button>
+            <div className="card" style={{ marginBottom: 20 }}>
+              <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>অর্ডার সারসংক্ষেপ</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
+                {ORDER_BUCKETS.map((b) => (
+                  <div key={b.label}>
+                    <span className={`stamp ${b.cls}`}>{b.label}</span>
+                    <div style={{ fontSize: "1.3rem", fontWeight: 700, marginTop: 8 }}>{sumKeys(data.orderStatusCounts, b.keys)}</div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+
+            <div className="card" style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <h2 style={{ fontSize: "1.05rem" }}>টপ সেলার</h2>
+                <a className="btn btn-outline btn-sm" href="/leaderboard">সম্পূর্ণ লিডারবোর্ড</a>
+              </div>
+              {data.topSellers.length === 0 && <div className="empty-state">এখনো কোনো ভ্যালিড সেল নেই।</div>}
+              {data.topSellers.map((s, i) => (
+                <div className="list-row" key={s.uid}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div
+                      style={{
+                        width: 30, height: 30, borderRadius: "50%",
+                        background: i < 3 ? "var(--gold-soft)" : "var(--paper)",
+                        color: i < 3 ? "var(--gold)" : "var(--ink-soft)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontWeight: 700, fontSize: "0.85rem", flexShrink: 0,
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{s.fullName}</div>
+                      <div className="muted">{s.memberId} · {s.totalOrders} অর্ডার</div>
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 700 }}>৳{s.totalSales}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <AdminLiveSalesFeed />
       </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, accent }) {
+  const color = accent === "teal" ? "var(--teal)" : accent === "gold" ? "var(--gold)" : accent === "red" ? "var(--red)" : "var(--ink)";
+  return (
+    <div className="card">
+      <div className="muted" style={{ marginBottom: 6, fontSize: "0.85rem" }}>{label}</div>
+      <div style={{ fontSize: "1.3rem", fontWeight: 700, color }}>{value}</div>
     </div>
   );
 }
