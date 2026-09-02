@@ -7,7 +7,7 @@ const ORDER_STATUSES = [
   "submitted", "under_review", "approved", "rejected",
   "processing", "delivered", "completed", "cancelled", "returned", "refunded",
 ];
-const MEMBER_STATUSES = ["pending", "active", "suspended", "rejected"];
+const MEMBER_STATUSES = ["pending", "active", "suspended", "banned", "removed", "rejected"];
 
 async function countWhere(collectionName, field, value) {
   const snap = await adminDb.collection(collectionName).where(field, "==", value).count().get();
