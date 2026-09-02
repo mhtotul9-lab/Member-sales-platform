@@ -45,7 +45,7 @@ export default function Nav({ role, active }) {
         <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"}>
           <Logo size={30} />
           <span>
-            সেলস<span className="brand-accent">পার্টনার</span>
+            𝕵𝖔𝖑𝖗𝖆𝖘𝖎<span className="brand-accent">পার্টনার</span>
             {role === "admin" && <span className="brand-role"> · অ্যাডমিন</span>}
           </span>
         </a>

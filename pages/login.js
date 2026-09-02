@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span className="brand-accent">পার্টনার</span></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />𝕵𝖔𝖑𝖗𝖆𝖘𝖎<span className="brand-accent">পার্টনার</span></a>
       </header>
       <div className="container" style={{ maxWidth: 420 }}>
         <div className="card">
