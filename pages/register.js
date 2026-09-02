@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/firebase";
@@ -14,13 +14,35 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     address: "",
+    referralCode: "",
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [referralCheck, setReferralCheck] = useState(null); // null | "checking" | {valid, firstName}
+  const debounceRef = useRef(null);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
+
+  useEffect(() => {
+    const code = form.referralCode.trim();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!code) { setReferralCheck(null); return; }
+
+    setReferralCheck("checking");
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-referral-code?code=${encodeURIComponent(code)}`);
+        const body = await res.json();
+        setReferralCheck(body);
+      } catch {
+        setReferralCheck({ valid: false });
+      }
+    }, 500);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [form.referralCode]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,6 +54,10 @@ export default function Register() {
     }
     if (form.password.length < 6) {
       setError("পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।");
+      return;
+    }
+    if (form.referralCode.trim() && referralCheck && referralCheck.valid === false) {
+      setError("Member Code সঠিক নয় — ঠিক করুন অথবা খালি রেখে দিন।");
       return;
     }
 
@@ -49,6 +75,7 @@ export default function Register() {
           whatsapp: form.whatsapp,
           address: form.address,
           email: form.email,
+          referralCode: form.referralCode.trim(),
         }),
       });
 
@@ -96,6 +123,27 @@ export default function Register() {
             <div className="field">
               <label htmlFor="address">ঠিকানা</label>
               <textarea id="address" rows={2} value={form.address} onChange={(e) => update("address", e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="referralCode">যার মাধ্যমে যুক্ত হয়েছেন তার Member Code (ঐচ্ছিক)</label>
+              <input
+                id="referralCode"
+                value={form.referralCode}
+                onChange={(e) => update("referralCode", e.target.value.toUpperCase())}
+                placeholder="যেমন: MBR-00012"
+              />
+              <p className="help-text" style={{ marginTop: 6 }}>
+                সঠিক Member Code ব্যবহার করুন। রেজিস্ট্রেশন সম্পন্ন হলে এই মেম্বারের সাথে আপনার রেফারেল সম্পর্ক স্থায়ীভাবে যুক্ত হবে। কারো মাধ্যমে না এসে থাকলে খালি রাখুন।
+              </p>
+              {referralCheck === "checking" && <p className="help-text" style={{ marginTop: 6 }}>চেক করা হচ্ছে...</p>}
+              {referralCheck && referralCheck !== "checking" && referralCheck.valid && (
+                <p style={{ marginTop: 6, color: "var(--teal)", fontWeight: 600, fontSize: "0.88rem" }}>
+                  ✅ Referred By: {referralCheck.firstName}
+                </p>
+              )}
+              {referralCheck && referralCheck !== "checking" && referralCheck.valid === false && (
+                <p className="error-text" style={{ marginTop: 6 }}>❌ Invalid Member Code</p>
+              )}
             </div>
             <div className="field">
               <label htmlFor="password">পাসওয়ার্ড</label>

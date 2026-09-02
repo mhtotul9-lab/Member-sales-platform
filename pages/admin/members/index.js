@@ -150,6 +150,13 @@ export default function AdminMembers() {
                       {online ? "এখন অনলাইনে আছে" : m.lastActiveAt ? `শেষ সক্রিয়: ${timeAgo(m.lastActiveAt)}` : "কখনো লগইন করেনি"}
                       {m.lastLoginAt && ` · শেষ লগইন: ${timeAgo(m.lastLoginAt)}`}
                     </div>
+                    {(m.referredByMemberCode || m.referralCount > 0) && (
+                      <div className="muted" style={{ fontSize: "0.8rem", marginTop: 2 }}>
+                        {m.referredByMemberCode && `রেফারার: ${m.referredByMemberCode}`}
+                        {m.referredByMemberCode && m.referralCount > 0 && " · "}
+                        {m.referralCount > 0 && `রেফার করেছে ${m.referralCount} জন (${m.referralFirstSalesCount || 0}টা প্রথম সেল সম্পন্ন)`}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span className={`stamp ${acc.cls}`}>{acc.text}</span>

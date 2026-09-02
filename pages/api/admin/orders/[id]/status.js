@@ -1,5 +1,5 @@
 import { requireAdmin, adminDb, VALID_SALE_STATUSES } from "../../../../../lib/firebaseAdmin";
-import { createProfitPool, reverseProfitPool, recordSalesFeedEntry } from "../../../../../lib/business";
+import { createProfitPool, reverseProfitPool, recordSalesFeedEntry, processReferralCommission, reverseReferralCommission } from "../../../../../lib/business";
 import { notifyUser } from "../../../../../lib/notify";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
@@ -115,8 +115,10 @@ async function handler(req, res) {
       if (!wasValid && isValid) {
         await createProfitPool(id, freshOrder);
         await recordSalesFeedEntry(freshOrder);
+        await processReferralCommission(id, freshOrder);
       } else if (wasValid && !isValid) {
         await reverseProfitPool(id, freshOrder);
+        await reverseReferralCommission(id, freshOrder);
       }
     }
   } catch (profitErr) {
