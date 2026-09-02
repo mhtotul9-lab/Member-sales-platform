@@ -70,9 +70,7 @@ export default function AdminOverview() {
               <SummaryCard label="মোট মেম্বার (অ্যাপ্রুভড)" value={data.memberStatusCounts.active} />
               <SummaryCard label="সেলস-অ্যাক্টিভ মেম্বার" value={data.activeSalesMemberCount} accent="teal" />
               <SummaryCard label="পেন্ডিং রেজিস্ট্রেশন" value={data.memberStatusCounts.pending} accent="gold" />
-              <SummaryCard label="হোল্ড করা আছে" value={data.memberStatusCounts.suspended} accent="red" />
-              <SummaryCard label="ব্যান করা আছে" value={data.memberStatusCounts.banned} accent="red" />
-              <SummaryCard label="রিমুভড" value={data.memberStatusCounts.removed} accent="red" />
+              <SummaryCard label="সাসপেন্ডেড" value={data.memberStatusCounts.suspended} accent="red" />
             </div>
 
             <div className="card" style={{ marginBottom: 20 }}>

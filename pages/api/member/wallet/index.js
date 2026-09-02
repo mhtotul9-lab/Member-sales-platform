@@ -32,6 +32,12 @@ async function handler(req, res) {
     .get();
   const transactions = txnSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
+  const pendingOrdersSnap = await adminDb
+    .collection("orders")
+    .where("memberId", "==", decoded.uid)
+    .where("status", "in", ["submitted", "under_review"])
+    .get();
+
   return res.status(200).json({
     activityStatus: active ? "active" : "inactive",
     activeDays: settings.activeDays,
@@ -39,6 +45,7 @@ async function handler(req, res) {
     totalProfitEarned: profile.totalProfitEarned || 0,
     totalSales: profile.totalSales || 0,
     totalOrders: profile.totalOrders || 0,
+    pendingOrdersCount: pendingOrdersSnap.size,
     transactions,
   });
 }
