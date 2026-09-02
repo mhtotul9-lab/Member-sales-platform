@@ -61,7 +61,8 @@ export default function AdminOverview() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 20 }}>
               <SummaryCard label="মোট সেল" value={`৳${data.totalSales.toFixed(2)}`} />
               <SummaryCard label="কোম্পানির প্রফিট" value={`৳${data.totalCompanyProfit.toFixed(2)}`} />
-              <SummaryCard label="বিতরণ করা প্রফিট" value={`৳${data.totalDistributedProfit.toFixed(2)}`} />
+              <SummaryCard label="প্রফিট পুলে বিতরণ" value={`৳${data.totalDistributedProfit.toFixed(2)}`} />
+              <SummaryCard label="প্রোডাক্ট কমিশন পেইড" value={`৳${data.totalCommissionPaid.toFixed(2)}`} accent="teal" />
               <SummaryCard label="মোট উইথড্র (পেইড)" value={`৳${data.totalWithdrawn.toFixed(2)}`} />
               <SummaryCard label="পেন্ডিং উইথড্র" value={`৳${data.pendingWithdrawalAmount.toFixed(2)}`} accent="gold" />
             </div>
@@ -70,7 +71,9 @@ export default function AdminOverview() {
               <SummaryCard label="মোট মেম্বার (অ্যাপ্রুভড)" value={data.memberStatusCounts.active} />
               <SummaryCard label="সেলস-অ্যাক্টিভ মেম্বার" value={data.activeSalesMemberCount} accent="teal" />
               <SummaryCard label="পেন্ডিং রেজিস্ট্রেশন" value={data.memberStatusCounts.pending} accent="gold" />
-              <SummaryCard label="সাসপেন্ডেড" value={data.memberStatusCounts.suspended} accent="red" />
+              <SummaryCard label="হোল্ড করা আছে" value={data.memberStatusCounts.suspended} accent="red" />
+              <SummaryCard label="ব্যান করা আছে" value={data.memberStatusCounts.banned} accent="red" />
+              <SummaryCard label="রিমুভড" value={data.memberStatusCounts.removed} accent="red" />
             </div>
 
             <div className="card" style={{ marginBottom: 20 }}>

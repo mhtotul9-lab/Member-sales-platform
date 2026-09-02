@@ -48,6 +48,12 @@ async function handler(req, res) {
       update.profit = Number((sellingPrice - costPrice).toFixed(2));
     }
 
+    if (body.memberCommission !== undefined) {
+      const memberCommission = Number(body.memberCommission);
+      if (isNaN(memberCommission) || memberCommission < 0) return res.status(400).json({ error: "সঠিক মেম্বার কমিশন দিন (প্রতি ইউনিট)।" });
+      update.memberCommission = memberCommission;
+    }
+
     await ref.update(update);
 
     await adminDb.collection("auditLogs").add({

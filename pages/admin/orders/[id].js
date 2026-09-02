@@ -116,6 +116,8 @@ export default function AdminOrderDetail() {
                 <div><span className="muted">মেম্বার:</span> {order.memberName}</div>
                 <div><span className="muted">প্রোডাক্ট:</span> {order.productName} × {order.quantity}</div>
                 <div><span className="muted">অর্ডার মূল্য:</span> ৳{order.orderAmount}</div>
+                <div><span className="muted">কোম্পানি প্রফিট:</span> ৳{order.profitAtOrder}</div>
+                <div><span className="muted">মেম্বার কমিশন:</span> ৳{order.commissionAtOrder || 0}</div>
                 <div><span className="muted">মার্কেটিং সোর্স:</span> {order.marketingSource}</div>
                 <div><span className="muted">কাস্টমার:</span> {order.customerName}</div>
                 <div><span className="muted">ফোন:</span> {order.customerPhone}</div>

@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span className="brand-accent">পার্টনার</span></div>
+        <div className="brand" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo height={30} /></div>
       </header>
       <div className="container">
         <div className="card" style={{ textAlign: "center", padding: "60px 28px" }}>

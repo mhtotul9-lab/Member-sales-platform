@@ -1,12 +1,11 @@
-export default function Logo({ size = 30 }) {
+export default function Logo({ height = 34 }) {
   // eslint-disable-next-line @next/next/no-img-element
   return (
     <img
-      src="/icon-192.png"
-      alt="সেলসপার্টনার"
-      width={size}
-      height={size}
-      style={{ borderRadius: size * 0.28, flexShrink: 0, objectFit: "cover" }}
+      src="/jolrasi-logo.png"
+      alt="Jolrasi Clothing Brand"
+      height={height}
+      style={{ height, width: "auto", flexShrink: 0, display: "block" }}
     />
   );
 }

@@ -7,6 +7,7 @@ function validate(body) {
   if (!body.name || !String(body.name).trim()) return "প্রোডাক্টের নাম দিতে হবে।";
   if (body.sellingPrice === undefined || isNaN(Number(body.sellingPrice))) return "সঠিক Selling Price দিন।";
   if (body.costPrice === undefined || isNaN(Number(body.costPrice))) return "সঠিক Cost Price দিন।";
+  if (body.memberCommission === undefined || isNaN(Number(body.memberCommission)) || Number(body.memberCommission) < 0) return "সঠিক মেম্বার কমিশন দিন (প্রতি ইউনিট)।";
   if (body.status && !STATUSES.includes(body.status)) return "অবৈধ status।";
   return null;
 }
@@ -31,6 +32,7 @@ async function handler(req, res) {
 
     const sellingPrice = Number(body.sellingPrice);
     const costPrice = Number(body.costPrice);
+    const memberCommission = Number(body.memberCommission);
 
     const doc = {
       name: String(body.name).trim(),
@@ -41,6 +43,7 @@ async function handler(req, res) {
       sellingPrice,
       costPrice,
       profit: Number((sellingPrice - costPrice).toFixed(2)),
+      memberCommission,
       status: STATUSES.includes(body.status) ? body.status : "active",
       mainImageUrl: body.mainImageUrl || "",
       imageUrls: Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [],

@@ -13,6 +13,7 @@ const emptyForm = {
   category: "",
   sellingPrice: "",
   costPrice: "",
+  memberCommission: "",
   status: "active",
   shortDescription: "",
   fullDescription: "",
@@ -32,6 +33,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           ...initial,
           sellingPrice: String(initial.sellingPrice ?? ""),
           costPrice: String(initial.costPrice ?? ""),
+          memberCommission: String(initial.memberCommission ?? ""),
           imageUrlsText: (initial.imageUrls || []).join("\n"),
         }
       : {}),
@@ -49,6 +51,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       category: form.category,
       sellingPrice: form.sellingPrice,
       costPrice: form.costPrice,
+      memberCommission: form.memberCommission,
       status: form.status,
       shortDescription: form.shortDescription,
       fullDescription: form.fullDescription,
@@ -89,6 +92,13 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
         <div className="field">
           <label htmlFor="costPrice">Cost Price (৳)</label>
           <input id="costPrice" type="number" step="0.01" required value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="memberCommission">মেম্বার কমিশন (৳ প্রতি ইউনিট)</label>
+          <input id="memberCommission" type="number" step="0.01" min="0" required value={form.memberCommission} onChange={(e) => update("memberCommission", e.target.value)} />
+          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
+            এই প্রোডাক্টটা কোনো মেম্বার সেল করলে, অর্ডার অ্যাপ্রুভ হওয়ার সাথে সাথে সে সরাসরি এই টাকাটা তার ওয়ালেটে পাবে।
+          </p>
         </div>
       </div>
 

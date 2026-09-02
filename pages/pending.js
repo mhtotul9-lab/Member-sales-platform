@@ -22,7 +22,7 @@ export default function Pending() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={28} />সেলস<span className="brand-accent">পার্টনার</span></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo height={30} /></a>
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>
@@ -37,8 +37,20 @@ export default function Pending() {
             </>
           ) : status === "suspended" ? (
             <>
-              <span className="stamp stamp-suspended" style={{ marginBottom: 16 }}>সাসপেন্ডেড</span>
-              <h1 style={{ fontSize: "1.2rem", margin: "12px 0" }}>আপনার অ্যাকাউন্ট সাসপেন্ড করা হয়েছে</h1>
+              <span className="stamp stamp-suspended" style={{ marginBottom: 16 }}>হোল্ড করা হয়েছে</span>
+              <h1 style={{ fontSize: "1.2rem", margin: "12px 0" }}>আপনার অ্যাকাউন্ট সাময়িকভাবে হোল্ড করা হয়েছে</h1>
+              <p className="muted">বিস্তারিত জানতে অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
+            </>
+          ) : status === "banned" ? (
+            <>
+              <span className="stamp stamp-suspended" style={{ marginBottom: 16 }}>ব্যান করা হয়েছে</span>
+              <h1 style={{ fontSize: "1.2rem", margin: "12px 0" }}>আপনার অ্যাকাউন্ট ব্যান করা হয়েছে</h1>
+              <p className="muted">বিস্তারিত জানতে অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
+            </>
+          ) : status === "removed" ? (
+            <>
+              <span className="stamp stamp-suspended" style={{ marginBottom: 16 }}>রিমুভড</span>
+              <h1 style={{ fontSize: "1.2rem", margin: "12px 0" }}>আপনাকে মেম্বার লিস্ট থেকে রিমুভ করা হয়েছে</h1>
               <p className="muted">বিস্তারিত জানতে অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
             </>
           ) : (
