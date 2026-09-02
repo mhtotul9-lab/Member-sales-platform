@@ -1,11 +1,6 @@
 import { requireAdmin, adminAuth, adminDb } from "../../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
-// Permanently deletes a member: their Firebase Auth account plus the
-// members/{uid} Firestore doc. This is irreversible — the doc is archived
-// to deletedMembers/{uid} first (with who deleted it and why) so past
-// orders/transactions/audit-logs referencing this memberId still have
-// something to look up, and so an admin can see who/why after the fact.
 async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -17,28 +12,23 @@ async function handler(req, res) {
   }
 
   const { uid } = req.query;
-  const { reason } = req.body || {};
-
-  if (uid === decoded.uid) {
-    return res.status(400).json({ error: "নিজের অ্যাকাউন্ট ডিলিট করা যাবে না।" });
-  }
-
   const memberRef = adminDb.collection("members").doc(uid);
   const snap = await memberRef.get();
   if (!snap.exists) return res.status(404).json({ error: "মেম্বার পাওয়া যায়নি।" });
 
-  const data = snap.data();
-  if (data.role === "admin") {
-    return res.status(400).json({ error: "অ্যাডমিন অ্যাকাউন্ট এখান থেকে ডিলিট করা যাবে না।" });
-  }
+  const member = snap.data();
+  if (member.role === "admin") return res.status(400).json({ error: "অ্যাডমিন অ্যাকাউন্ট ডিলিট করা যাবে না।" });
 
-  await adminDb.collection("deletedMembers").doc(uid).set({
-    ...data,
-    deletedAt: new Date().toISOString(),
-    deletedBy: decoded.uid,
-    deletedByEmail: decoded.email || null,
-    deleteReason: reason || null,
+  // Remove the login account so they truly can't sign in again, and remove
+  // their profile. Historical orders/transactions are left untouched —
+  // they already carry a snapshot of the member's name, so past accounting
+  // and reports stay intact even though the live profile is gone.
+  await adminAuth.deleteUser(uid).catch((err) => {
+    // If the Auth user is already gone for some reason, don't block
+    // deleting the leftover Firestore profile.
+    if (err.code !== "auth/user-not-found") throw err;
   });
+  await memberRef.delete();
 
   await adminDb.collection("auditLogs").add({
     actor: decoded.uid,
@@ -46,21 +36,9 @@ async function handler(req, res) {
     action: "member.delete",
     entity: "members",
     entityId: uid,
-    before: { status: data.status, fullName: data.fullName, memberId: data.memberId },
-    after: null,
-    reason: reason || null,
+    before: { fullName: member.fullName, memberId: member.memberId, email: member.email },
     timestamp: new Date().toISOString(),
   });
-
-  try {
-    await adminAuth.deleteUser(uid);
-  } catch (err) {
-    // If the auth user is already gone, keep going and still remove the
-    // Firestore doc so the member fully disappears from the app.
-    if (err.code !== "auth/user-not-found") throw err;
-  }
-
-  await memberRef.delete();
 
   return res.status(200).json({ ok: true });
 }

@@ -100,13 +100,6 @@ export default function AdminSettings() {
                 <input id="minWithdrawalAmount" type="number" min="0" required value={form.minWithdrawalAmount} onChange={(e) => setForm((f) => ({ ...f, minWithdrawalAmount: Number(e.target.value) }))} />
               </div>
               <div className="field">
-                <label htmlFor="poolProfitSharePercent">কোম্পানির প্রফিটের কত % পুলে ভাগ হবে (%)</label>
-                <input id="poolProfitSharePercent" type="number" min="0" max="100" required value={form.poolProfitSharePercent} onChange={(e) => setForm((f) => ({ ...f, poolProfitSharePercent: Number(e.target.value) }))} />
-                <p className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
-                  প্রতিটা সেলের কোম্পানি-প্রফিটের এই শতাংশ সব অ্যাক্টিভ মেম্বারের মধ্যে সমান ভাগ হয়। এটা প্রোডাক্টের নিজস্ব ফিক্সড মেম্বার কমিশন থেকে আলাদা — কমিশন সবসময় শুধু যে সেল করেছে সে-ই পুরোটা পায়।
-                </p>
-              </div>
-              <div className="field">
                 <label>উইথড্র পেমেন্ট মেথড</label>
                 <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 6 }}>
                   {availableMethods.map((m) => (

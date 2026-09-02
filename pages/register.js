@@ -95,7 +95,7 @@ export default function Register() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo height={30} /></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={32} /></a>
       </header>
       <div className="container" style={{ maxWidth: 520 }}>
         <div className="card">

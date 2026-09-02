@@ -7,7 +7,7 @@ const ORDER_STATUSES = [
   "submitted", "under_review", "approved", "rejected",
   "processing", "delivered", "completed", "cancelled", "returned", "refunded",
 ];
-const MEMBER_STATUSES = ["pending", "active", "suspended", "banned", "removed", "rejected"];
+const MEMBER_STATUSES = ["pending", "active", "suspended", "rejected"];
 
 async function countWhere(collectionName, field, value) {
   const snap = await adminDb.collection(collectionName).where(field, "==", value).count().get();
@@ -37,7 +37,6 @@ async function handler(req, res) {
       adminDb.collection("orders").where("status", "in", VALID_SALE_STATUSES).aggregate({
         totalSales: AggregateField.sum("orderAmount"),
         totalProfit: AggregateField.sum("profitAtOrder"),
-        totalCommission: AggregateField.sum("commissionAtOrder"),
       }).get(),
       sumWhere("profitPools", "distributed", "==", true, "poolAmount"),
       sumWhere("withdrawals", "status", "==", "paid", "amount"),
@@ -64,7 +63,6 @@ async function handler(req, res) {
     orderStatusCounts,
     totalSales: totals.totalSales || 0,
     totalCompanyProfit: totals.totalProfit || 0,
-    totalCommissionPaid: totals.totalCommission || 0,
     totalDistributedProfit: distributedSnap,
     totalWithdrawn: withdrawnSnap,
     pendingWithdrawalAmount: pendingWithdrawSnap.data().total || 0,
