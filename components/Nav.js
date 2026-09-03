@@ -44,7 +44,7 @@ export default function Nav({ role, active }) {
       <div className="topbar-left">
         <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"}>
           <Logo height={34} />
-          {role === "admin" && <span className="brand-role"> · অ্যাডমিন</span>}
+          {role === "admin" && <span className="brand-role">অ্যাডমিন</span>}
         </a>
         <nav className="topbar-links">
           {links.map((l) => <a key={l.key} href={l.href} className={linkClass(l.key)}>{l.label}</a>)}
