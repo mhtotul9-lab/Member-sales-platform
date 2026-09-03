@@ -9,14 +9,18 @@ const STATUS_FILTERS = [
   { value: "", label: "সব" },
   { value: "pending", label: "পেন্ডিং" },
   { value: "active", label: "অ্যাপ্রুভড" },
-  { value: "suspended", label: "সাসপেন্ডেড" },
+  { value: "suspended", label: "হোল্ড" },
+  { value: "banned", label: "ব্যানড" },
+  { value: "removed", label: "রিমুভড" },
   { value: "rejected", label: "রিজেক্টেড" },
 ];
 
 const ACCOUNT_STATUS_LABEL = {
   pending: { text: "পেন্ডিং", cls: "stamp-pending" },
   active: { text: "অ্যাপ্রুভড", cls: "stamp-active" },
-  suspended: { text: "সাসপেন্ডেড", cls: "stamp-rejected" },
+  suspended: { text: "হোল্ড", cls: "stamp-rejected" },
+  banned: { text: "ব্যানড", cls: "stamp-rejected" },
+  removed: { text: "রিমুভড", cls: "stamp-rejected" },
   rejected: { text: "রিজেক্টেড", cls: "stamp-rejected" },
 };
 
@@ -35,6 +39,8 @@ export default function AdminMembers() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [actingOn, setActingOn] = useState(null);
+  const [confirmDeleteUid, setConfirmDeleteUid] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   useEffect(() => {
     if (loading) return;
@@ -81,44 +87,18 @@ export default function AdminMembers() {
     }
   }
 
-  const filtered = useMemo(() => {
-    if (!members) return [];
-    let list = members;
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      list = list.filter((m) =>
-        m.fullName?.toLowerCase().includes(q) ||
-        m.email?.toLowerCase().includes(q) ||
-        m.phone?.includes(q) ||
-        m.memberId?.toLowerCase().includes(q)
-      );
-    }
-    // Online members first, then most-recently-active first among the rest.
-    return [...list].sort((a, b) => {
-      const aOnline = isOnline(a.lastActiveAt);
-      const bOnline = isOnline(b.lastActiveAt);
-      if (aOnline !== bOnline) return aOnline ? -1 : 1;
-      const aTime = a.lastActiveAt ? new Date(a.lastActiveAt).getTime() : 0;
-      const bTime = b.lastActiveAt ? new Date(b.lastActiveAt).getTime() : 0;
-      return bTime - aTime;
-    });
-  }, [members, search]);
-
-  async function removeMember(m) {
-    const confirmed = window.confirm(
-      `${m.fullName} (${m.memberId})-কে স্থায়ীভাবে ডিলিট করতে চান? এই অ্যাকশন ফেরত নেওয়া যাবে না — সে আর লগইন করতে পারবে না। (তার আগের অর্ডার/লেনদেনের হিস্ট্রি থেকে যাবে।)`
-    );
-    if (!confirmed) return;
-
-    setActingOn(m.uid);
+  async function hardDelete(uid) {
+    setActingOn(uid);
     try {
       const token = await user.getIdToken();
-      const res = await fetch(`/api/admin/members/${m.uid}/delete`, {
+      const res = await fetch(`/api/admin/members/${uid}/delete`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "ডিলিট করা যায়নি।");
+      setConfirmDeleteUid(null);
+      setDeleteConfirmText("");
       load();
     } catch (err) {
       setError(err.message);
@@ -126,6 +106,37 @@ export default function AdminMembers() {
       setActingOn(null);
     }
   }
+
+  // Online members first (most-recently-active first), then everyone else
+  // sorted by their most recent activity. Within "offline", members with a
+  // status other than active (hold/banned/removed/rejected) sink to the
+  // bottom so the admin's eye lands on real, reachable members first.
+  const filtered = useMemo(() => {
+    if (!members) return [];
+    const q = search.trim().toLowerCase();
+    const base = q
+      ? members.filter((m) =>
+          m.fullName?.toLowerCase().includes(q) ||
+          m.email?.toLowerCase().includes(q) ||
+          m.phone?.includes(q) ||
+          m.memberId?.toLowerCase().includes(q)
+        )
+      : members;
+
+    return [...base].sort((a, b) => {
+      const aOnline = isOnline(a.lastActiveAt);
+      const bOnline = isOnline(b.lastActiveAt);
+      if (aOnline !== bOnline) return aOnline ? -1 : 1;
+
+      const aInactive = a.status !== "active";
+      const bInactive = b.status !== "active";
+      if (!aOnline && aInactive !== bInactive) return aInactive ? 1 : -1;
+
+      const aTime = a.lastActiveAt ? new Date(a.lastActiveAt).getTime() : 0;
+      const bTime = b.lastActiveAt ? new Date(b.lastActiveAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [members, search]);
 
   if (loading || !profile) return null;
 
@@ -136,7 +147,7 @@ export default function AdminMembers() {
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 4 }}>মেম্বার</h1>
           <p className="muted" style={{ marginBottom: 18 }}>
-            অ্যাকাউন্ট স্ট্যাটাস, সেলস অ্যাক্টিভিটি, এবং কে এখন অনলাইনে আছে — সব একসাথে। 🔵 যারা এখন অনলাইনে আছে তারা তালিকার উপরে থাকবে।
+            অ্যাকাউন্ট স্ট্যাটাস, সেলস অ্যাক্টিভিটি, এবং কে এখন অনলাইনে আছে — সব একসাথে।
           </p>
 
           <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
@@ -174,7 +185,7 @@ export default function AdminMembers() {
                         title={online ? "অনলাইন" : "অফলাইন"}
                         style={{
                           width: 9, height: 9, borderRadius: "50%", flexShrink: 0,
-                          background: online ? "#2563EB" : "var(--line)",
+                          background: online ? "var(--teal)" : "var(--line)",
                         }}
                       />
                       {m.fullName} <span className="muted">· {m.memberId}</span>
@@ -210,18 +221,53 @@ export default function AdminMembers() {
                     </>
                   )}
                   {m.status === "active" && (
-                    <button className="btn btn-danger btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "suspended")}>সাসপেন্ড করুন</button>
+                    <>
+                      <button className="btn btn-outline btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "suspended")}>হোল্ড করুন</button>
+                      <button className="btn btn-danger btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "banned")}>ব্যান করুন</button>
+                      <button className="btn btn-danger btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "removed")}>রিমুভ করুন</button>
+                    </>
                   )}
-                  {m.status === "suspended" && (
+                  {(m.status === "suspended" || m.status === "banned" || m.status === "removed") && (
                     <button className="btn btn-teal btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "active")}>পুনরায় সক্রিয় করুন</button>
                   )}
                   {m.status === "rejected" && (
                     <button className="btn btn-outline btn-sm" disabled={actingOn === m.uid} onClick={() => act(m.uid, "pending")}>পেন্ডিং-এ ফেরত পাঠান</button>
                   )}
-                  <button className="btn btn-danger btn-sm" disabled={actingOn === m.uid} onClick={() => removeMember(m)}>
-                    ডিলিট করুন
-                  </button>
+                  {confirmDeleteUid !== m.uid && (
+                    <button
+                      className="btn btn-danger btn-sm"
+                      style={{ marginLeft: "auto" }}
+                      disabled={actingOn === m.uid}
+                      onClick={() => { setConfirmDeleteUid(m.uid); setDeleteConfirmText(""); }}
+                    >
+                      অ্যাকাউন্ট ডিলিট করুন
+                    </button>
+                  )}
                 </div>
+
+                {confirmDeleteUid === m.uid && (
+                  <div style={{ marginTop: 10, padding: 12, borderRadius: 8, background: "var(--red-soft)" }}>
+                    <p style={{ fontSize: "0.85rem", marginBottom: 8 }}>
+                      এই অ্যাকাউন্ট পুরোপুরি ডিলিট হয়ে যাবে — এটা আর ফিরিয়ে আনা যাবে না। নিশ্চিত করতে নিচে <strong>{m.memberId}</strong> লিখুন।
+                    </p>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <input
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder={m.memberId}
+                        style={{ flex: "1 1 160px", padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 7 }}
+                      />
+                      <button
+                        className="btn btn-danger btn-sm"
+                        disabled={actingOn === m.uid || deleteConfirmText.trim() !== m.memberId}
+                        onClick={() => hardDelete(m.uid)}
+                      >
+                        চিরতরে ডিলিট করুন
+                      </button>
+                      <button className="btn btn-outline btn-sm" disabled={actingOn === m.uid} onClick={() => setConfirmDeleteUid(null)}>বাতিল</button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

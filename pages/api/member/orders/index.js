@@ -49,7 +49,7 @@ async function handler(req, res) {
     const orderAmount = Number((product.sellingPrice * qty).toFixed(2));
     const costPriceAtOrder = Number(product.costPrice) || 0;
     const profitAtOrder = Number((orderAmount - costPriceAtOrder * qty).toFixed(2));
-    const referralCommissionAtOrder = Number(product.referralCommissionAmount) || 0;
+    const commissionAtOrder = Number(((Number(product.memberCommission) || 0) * qty).toFixed(2));
     const normalizedPhone = normalizePhone(customerPhone);
 
     // --- Duplicate / fraud checks -------------------------------------
@@ -110,7 +110,7 @@ async function handler(req, res) {
       orderAmount,
       costPriceAtOrder,
       profitAtOrder,
-      referralCommissionAtOrder,
+      commissionAtOrder,
       customerName,
       customerPhone,
       customerPhoneNormalized: normalizedPhone,

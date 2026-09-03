@@ -17,33 +17,17 @@ async function handler(req, res) {
     .where("referredByMemberId", "==", decoded.uid)
     .get();
 
-  const referredRaw = referredSnap.docs.map((d) => ({ uid: d.id, ...d.data() }));
-
-  const referred = await Promise.all(
-    referredRaw
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map(async (m) => {
-        let bonusAmount = 0;
-        if (m.firstSaleCompleted) {
-          const txnSnap = await adminDb
-            .collection("transactions")
-            .where("refMemberId", "==", m.uid)
-            .where("type", "==", "referral_bonus")
-            .limit(1)
-            .get();
-          if (!txnSnap.empty) bonusAmount = txnSnap.docs[0].data().amount;
-        }
-        return {
-          uid: m.uid,
-          fullName: m.fullName,
-          memberId: m.memberId,
-          createdAt: m.createdAt,
-          firstSaleCompleted: !!m.firstSaleCompleted,
-          firstSaleAt: m.firstSaleAt || null,
-          bonusAmount,
-        };
-      })
-  );
+  const referred = referredSnap.docs
+    .map((d) => ({ uid: d.id, ...d.data() }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map((m) => ({
+      uid: m.uid,
+      fullName: m.fullName,
+      memberId: m.memberId,
+      createdAt: m.createdAt,
+      firstSaleCompleted: !!m.firstSaleCompleted,
+      firstSaleAt: m.firstSaleAt || null,
+    }));
 
   return res.status(200).json({
     memberCode: profile.memberId,

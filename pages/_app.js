@@ -6,7 +6,7 @@ export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
       <Head>
-        <title>Jolrasi Partner</title>
+        <title>𝕵𝖔𝖑𝖗𝖆𝖘𝖎পার্টনার</title>
       </Head>
       <Component {...pageProps} />
     </AuthProvider>

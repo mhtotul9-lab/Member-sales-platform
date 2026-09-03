@@ -90,8 +90,7 @@ export default function AdminProducts() {
                       {p.name} <span className="muted">· ৳{p.sellingPrice}</span>
                     </div>
                     <div className="muted">
-                      {p.category || "ক্যাটাগরি নেই"} · প্রফিট ৳{p.profit}
-                      {p.referralCommissionAmount > 0 && ` · রেফারেল কমিশন ৳${p.referralCommissionAmount}`}
+                      {p.category || "ক্যাটাগরি নেই"} · প্রফিট ৳{p.profit} · কমিশন ৳{p.memberCommission || 0}
                     </div>
                   </div>
                 </div>

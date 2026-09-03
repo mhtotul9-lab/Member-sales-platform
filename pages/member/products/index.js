@@ -89,6 +89,9 @@ export default function MemberProducts() {
               )}
               <div style={{ fontWeight: 600, marginBottom: 4 }}>{p.name}</div>
               <div className="muted">৳{p.sellingPrice}</div>
+              <div style={{ color: "var(--teal)", fontWeight: 600, fontSize: "0.85rem", marginTop: 4 }}>
+                কমিশন ৳{p.memberCommission || 0}
+              </div>
             </a>
           ))}
         </div>

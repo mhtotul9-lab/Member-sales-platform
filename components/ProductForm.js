@@ -13,7 +13,7 @@ const emptyForm = {
   category: "",
   sellingPrice: "",
   costPrice: "",
-  referralCommissionAmount: "",
+  memberCommission: "",
   status: "active",
   shortDescription: "",
   fullDescription: "",
@@ -33,7 +33,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           ...initial,
           sellingPrice: String(initial.sellingPrice ?? ""),
           costPrice: String(initial.costPrice ?? ""),
-          referralCommissionAmount: String(initial.referralCommissionAmount ?? ""),
+          memberCommission: String(initial.memberCommission ?? ""),
           imageUrlsText: (initial.imageUrls || []).join("\n"),
         }
       : {}),
@@ -51,7 +51,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       category: form.category,
       sellingPrice: form.sellingPrice,
       costPrice: form.costPrice,
-      referralCommissionAmount: form.referralCommissionAmount,
+      memberCommission: form.memberCommission,
       status: form.status,
       shortDescription: form.shortDescription,
       fullDescription: form.fullDescription,
@@ -94,10 +94,10 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           <input id="costPrice" type="number" step="0.01" required value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} />
         </div>
         <div className="field">
-          <label htmlFor="referralCommissionAmount">রেফারেল কমিশন (৳)</label>
-          <input id="referralCommissionAmount" type="number" step="0.01" min="0" value={form.referralCommissionAmount} onChange={(e) => update("referralCommissionAmount", e.target.value)} placeholder="0" />
-          <p className="help-text" style={{ marginTop: 6 }}>
-            এই প্রোডাক্টের প্রথম সেলে রেফারারকে কত টাকা বোনাস দেওয়া হবে। খালি/০ রাখলে এই প্রোডাক্টে কোনো রেফারেল বোনাস দেওয়া হবে না।
+          <label htmlFor="memberCommission">মেম্বার কমিশন (৳ প্রতি ইউনিট)</label>
+          <input id="memberCommission" type="number" step="0.01" min="0" required value={form.memberCommission} onChange={(e) => update("memberCommission", e.target.value)} />
+          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
+            এই প্রোডাক্টটা কোনো মেম্বার সেল করলে, অর্ডার অ্যাপ্রুভ হওয়ার সাথে সাথে সে সরাসরি এই টাকাটা তার ওয়ালেটে পাবে।
           </p>
         </div>
       </div>

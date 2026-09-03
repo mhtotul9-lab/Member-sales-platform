@@ -5,12 +5,13 @@ import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
 
 const TXN_LABEL = {
-  profit_earned: "প্রফিট",
-  profit_adjustment: "এডজাস্টমেন্ট",
-  referral_bonus: "রেফারেল বোনাস",
-  referral_bonus_reversal: "রেফারেল এডজাস্টমেন্ট",
-  withdrawal: "উইথড্র (রিজার্ভড)",
-  withdrawal_reversal: "উইথড্র ফেরত",
+  profit_earned: { text: "প্রফিট পুল শেয়ার", sign: "+" },
+  profit_adjustment: { text: "প্রফিট পুল এডজাস্টমেন্ট", sign: "" },
+  product_commission: { text: "প্রোডাক্ট কমিশন", sign: "+" },
+  product_commission_reversal: { text: "কমিশন এডজাস্টমেন্ট", sign: "" },
+  referral_bonus: { text: "রেফারেল বোনাস", sign: "+" },
+  referral_bonus_reversal: { text: "রেফারেল বোনাস এডজাস্টমেন্ট", sign: "" },
+  withdrawal: { text: "উইথড্র", sign: "" },
 };
 
 export default function MemberWallet() {
@@ -69,21 +70,16 @@ export default function MemberWallet() {
                 <div style={{ fontSize: "1.4rem", fontWeight: 700 }}>৳{wallet.availableBalance}</div>
               </div>
               <div className="card">
-                <div className="muted" style={{ marginBottom: 6 }}>মোট প্রফিট আয়</div>
+                <div className="muted" style={{ marginBottom: 6 }}>মোট প্রফিট পুল আয়</div>
                 <div style={{ fontSize: "1.4rem", fontWeight: 700 }}>৳{wallet.totalProfitEarned}</div>
+              </div>
+              <div className="card">
+                <div className="muted" style={{ marginBottom: 6 }}>মোট কমিশন আয়</div>
+                <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "var(--teal)" }}>৳{wallet.totalCommissionEarned}</div>
               </div>
               <div className="card">
                 <div className="muted" style={{ marginBottom: 6 }}>মোট সেল</div>
                 <div style={{ fontSize: "1.4rem", fontWeight: 700 }}>৳{wallet.totalSales}</div>
-              </div>
-              <div className="card">
-                <div className="muted" style={{ marginBottom: 6 }}>অ্যাডমিনের সিদ্ধান্তের অপেক্ষায়</div>
-                <div style={{ fontSize: "1.4rem", fontWeight: 700, color: wallet.pendingOrdersCount > 0 ? "var(--gold)" : "var(--ink)" }}>
-                  {wallet.pendingOrdersCount} টা অর্ডার
-                </div>
-                <div className="muted" style={{ marginTop: 8, fontSize: "0.78rem" }}>
-                  অ্যাপ্রুভ হলেই প্রফিট এখানে যোগ হবে
-                </div>
               </div>
             </div>
 
@@ -91,12 +87,12 @@ export default function MemberWallet() {
               <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>ট্রানজেকশন হিস্ট্রি</h2>
               {wallet.transactions.length === 0 && <div className="empty-state">এখনো কোনো ট্রানজেকশন নেই।</div>}
               {wallet.transactions.map((t) => {
-                const label = TXN_LABEL[t.type] || t.type;
+                const label = TXN_LABEL[t.type] || { text: t.type, sign: "" };
                 const positive = t.amount >= 0;
                 return (
                   <div className="list-row" key={t.id}>
                     <div>
-                      <div style={{ fontWeight: 600 }}>{label}</div>
+                      <div style={{ fontWeight: 600 }}>{label.text}</div>
                       <div className="muted">{t.description}</div>
                       <div className="muted" style={{ fontSize: "0.82rem" }}>{new Date(t.createdAt).toLocaleString("bn-BD")}</div>
                     </div>

@@ -111,7 +111,10 @@ export default function MemberProductDetail() {
                 <img src={product.mainImageUrl} alt={product.name} style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 8, marginBottom: 18 }} />
               )}
               <h1 style={{ fontSize: "1.35rem", marginBottom: 6 }}>{product.name}</h1>
-              <div className="muted" style={{ marginBottom: 10 }}>৳{product.sellingPrice} {product.category && `· ${product.category}`}</div>
+              <div className="muted" style={{ marginBottom: 6 }}>৳{product.sellingPrice} {product.category && `· ${product.category}`}</div>
+              <div style={{ marginBottom: 10 }}>
+                <span className="stamp stamp-active">এই প্রোডাক্ট সেল করলে কমিশন ৳{product.memberCommission || 0}</span>
+              </div>
               <div style={{ marginBottom: 14 }}>
                 <CopyButton text={product.name} label="প্রোডাক্টের নাম কপি করুন" />
               </div>
