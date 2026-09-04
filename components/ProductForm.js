@@ -14,7 +14,6 @@ const emptyForm = {
   sellingPrice: "",
   costPrice: "",
   memberCommission: "",
-  referralCommissionAmount: "",
   status: "active",
   shortDescription: "",
   fullDescription: "",
@@ -35,7 +34,6 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           sellingPrice: String(initial.sellingPrice ?? ""),
           costPrice: String(initial.costPrice ?? ""),
           memberCommission: String(initial.memberCommission ?? ""),
-          referralCommissionAmount: String(initial.referralCommissionAmount ?? ""),
           imageUrlsText: (initial.imageUrls || []).join("\n"),
         }
       : {}),
@@ -54,7 +52,6 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       sellingPrice: form.sellingPrice,
       costPrice: form.costPrice,
       memberCommission: form.memberCommission,
-      referralCommissionAmount: form.referralCommissionAmount,
       status: form.status,
       shortDescription: form.shortDescription,
       fullDescription: form.fullDescription,
@@ -101,13 +98,6 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           <input id="memberCommission" type="number" step="0.01" min="0" required value={form.memberCommission} onChange={(e) => update("memberCommission", e.target.value)} />
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
             এই প্রোডাক্টটা কোনো মেম্বার সেল করলে, অর্ডার অ্যাপ্রুভ হওয়ার সাথে সাথে সে সরাসরি এই টাকাটা তার ওয়ালেটে পাবে।
-          </p>
-        </div>
-        <div className="field">
-          <label htmlFor="referralCommissionAmount">রেফারেল কমিশন (৳) — যে রেফার করেছে তার জন্য</label>
-          <input id="referralCommissionAmount" type="number" step="0.01" min="0" value={form.referralCommissionAmount} onChange={(e) => update("referralCommissionAmount", e.target.value)} placeholder="0" />
-          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
-            উপরের &quot;মেম্বার কমিশন&quot; থেকে আলাদা — এটা যায় সেলারকে যে রেফার করেছিল তার কাছে, শুধু সেলারের প্রথম সেলে, একবারই। খালি/০ রাখলে এই প্রোডাক্টে কোনো রেফারেল বোনাস দেওয়া হবে না।
           </p>
         </div>
       </div>
