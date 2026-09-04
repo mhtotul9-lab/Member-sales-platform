@@ -24,7 +24,7 @@ const ACCOUNT_STATUS_LABEL = {
   rejected: { text: "রিজেক্টেড", cls: "stamp-rejected" },
 };
 
-const ONLINE_WINDOW_MS = 2 * 60 * 1000;
+const ONLINE_WINDOW_MS = 6 * 60 * 1000; // widened to match the slower 3-minute heartbeat, so a member doesn't flicker to "offline" between beats
 
 function isOnline(lastActiveAt) {
   if (!lastActiveAt) return false;
