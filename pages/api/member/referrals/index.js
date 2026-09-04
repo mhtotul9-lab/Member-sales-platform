@@ -1,6 +1,5 @@
 import { requireActiveMember, adminDb } from "../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
-import { REFERRAL_BONUS_AMOUNT } from "../../../../lib/business";
 
 async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
@@ -20,10 +19,10 @@ async function handler(req, res) {
 
   const referredRaw = referredSnap.docs.map((d) => ({ uid: d.id, ...d.data() }));
 
-  // The bonus is always the same fixed amount (REFERRAL_BONUS_AMOUNT), so
-  // there's no need to query the transactions collection per referred
-  // member just to look up a number that never varies — that was an
-  // avoidable N+1 read for every member who opens their referrals page.
+  // The bonus amount can change over time (it's now an admin-configurable
+  // setting), so each referred member's actual paid amount is snapshotted
+  // onto their own member doc (referralCommissionAmountPaid) at the moment
+  // their bonus fires — no need to query transactions per referred member.
   const referred = referredRaw
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map((m) => ({
@@ -31,9 +30,10 @@ async function handler(req, res) {
       fullName: m.fullName,
       memberId: m.memberId,
       createdAt: m.createdAt,
-      firstSaleCompleted: !!m.firstSaleCompleted,
+      qualifyingSalesCount: m.qualifyingSalesCount || 0,
+      firstSaleCompleted: !!m.referralCommissionPaid,
       firstSaleAt: m.firstSaleAt || null,
-      bonusAmount: m.firstSaleCompleted ? REFERRAL_BONUS_AMOUNT : 0,
+      bonusAmount: m.referralCommissionPaid ? (m.referralCommissionAmountPaid || 0) : 0,
     }));
 
   return res.status(200).json({

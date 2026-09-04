@@ -65,8 +65,10 @@ export default function AdminProfit() {
                   <div>
                     <div style={{ fontWeight: 600 }}>{p.orderId}</div>
                     <div className="muted">
-                      পুল ৳{p.poolAmount} · {p.eligibleMemberIds.length} জন eligible member
-                      {p.distributed ? ` · জনপ্রতি ৳${p.perMemberShare}` : ""}
+                      পুল ৳{p.poolAmount} · {(p.entries || []).length} লেভেল-এন্ট্রি
+                      {p.distributed && (p.entries || []).length > 0
+                        ? " · " + p.entries.map((e) => `লেভেল-${e.level}: ৳${e.amount}`).join(", ")
+                        : ""}
                     </div>
                     {p.reversedAt && <div className="error-text" style={{ marginTop: 4 }}>রিভার্সড (রিটার্ন/রিফান্ড)</div>}
                     {!p.distributed && <div className="muted" style={{ marginTop: 4 }}>{p.note}</div>}

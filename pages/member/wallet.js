@@ -7,6 +7,8 @@ import Loading from "../../components/Loading";
 const TXN_LABEL = {
   profit_earned: { text: "প্রফিট পুল শেয়ার", sign: "+" },
   profit_adjustment: { text: "প্রফিট পুল এডজাস্টমেন্ট", sign: "" },
+  profit_pool_share: { text: "প্রফিট পুল শেয়ার", sign: "+" },
+  profit_pool_adjustment: { text: "প্রফিট পুল এডজাস্টমেন্ট", sign: "" },
   product_commission: { text: "প্রোডাক্ট কমিশন", sign: "+" },
   product_commission_reversal: { text: "কমিশন এডজাস্টমেন্ট", sign: "" },
   referral_bonus: { text: "রেফারেল বোনাস", sign: "+" },

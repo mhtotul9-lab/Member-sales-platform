@@ -1,5 +1,5 @@
 import { requireAdmin, adminDb, VALID_SALE_STATUSES } from "../../../../../lib/firebaseAdmin";
-import { createProfitPool, reverseProfitPool, recordSalesFeedEntry, processReferralCommission, reverseReferralCommission, processProductCommission, reverseProductCommission } from "../../../../../lib/business";
+import { processProfitPoolShares, reverseProfitPool, recordSalesFeedEntry, processReferralCommission, reverseReferralCommission, processProductCommission, reverseProductCommission, getSettings } from "../../../../../lib/business";
 import { notifyUser } from "../../../../../lib/notify";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 
@@ -113,14 +113,24 @@ async function handler(req, res) {
       const freshSnap = await orderRef.get();
       const freshOrder = { id: freshSnap.id, ...freshSnap.data() };
       if (!wasValid && isValid) {
-        await createProfitPool(id, freshOrder);
+        const settings = await getSettings();
         await processProductCommission(id, freshOrder);
         await recordSalesFeedEntry(freshOrder);
-        await processReferralCommission(id, freshOrder);
+        // Referral bonus runs first so processProfitPoolShares can see
+        // whether it fired on this order (order.referralBonusAmount) when
+        // checking maxTotalPayoutPerSale — re-fetch the order in between so
+        // that flag is visible before the pool cascade calculates its cap.
+        await processReferralCommission(id, freshOrder, settings);
+        const afterReferralSnap = await orderRef.get();
+        const afterReferralOrder = { id: afterReferralSnap.id, ...afterReferralSnap.data() };
+        await processProfitPoolShares(id, afterReferralOrder, settings);
       } else if (wasValid && !isValid) {
-        await reverseProfitPool(id, freshOrder);
-        await reverseProductCommission(id, freshOrder);
-        await reverseReferralCommission(id, freshOrder);
+        const settings = await getSettings();
+        if (settings.reverseOnRefund) {
+          await reverseProfitPool(id, freshOrder);
+          await reverseProductCommission(id, freshOrder);
+          await reverseReferralCommission(id, freshOrder);
+        }
       }
     }
   } catch (profitErr) {

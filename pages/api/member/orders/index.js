@@ -1,5 +1,6 @@
 import { requireActiveMember, adminDb, nextOrderId } from "../../../../lib/firebaseAdmin";
 import { notifyAdmins } from "../../../../lib/notify";
+import { getSettings } from "../../../../lib/business";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 function normalizePhone(phone) {
@@ -50,7 +51,12 @@ async function handler(req, res) {
     const costPriceAtOrder = Number(product.costPrice) || 0;
     const profitAtOrder = Number((orderAmount - costPriceAtOrder * qty).toFixed(2));
     const commissionAtOrder = Number(((Number(product.memberCommission) || 0) * qty).toFixed(2));
-    const referralCommissionAtOrder = Number(product.referralCommissionAmount) || 0;
+    // Direct Referral Commission is now a single platform-wide admin setting
+    // (not per-product) — snapshotted here at order-submit time so a later
+    // change to the setting never rewrites a bonus that's already in
+    // flight for this order.
+    const settings = await getSettings();
+    const referralCommissionAtOrder = Number(settings.directReferralCommission) || 0;
     const normalizedPhone = normalizePhone(customerPhone);
 
     // --- Duplicate / fraud checks -------------------------------------
