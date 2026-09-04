@@ -54,6 +54,12 @@ async function handler(req, res) {
       update.memberCommission = memberCommission;
     }
 
+    if (body.referralCommissionAmount !== undefined) {
+      const referralCommissionAmount = Number(body.referralCommissionAmount);
+      if (isNaN(referralCommissionAmount) || referralCommissionAmount < 0) return res.status(400).json({ error: "সঠিক রেফারেল কমিশন দিন।" });
+      update.referralCommissionAmount = referralCommissionAmount;
+    }
+
     await ref.update(update);
 
     await adminDb.collection("auditLogs").add({

@@ -91,6 +91,7 @@ export default function AdminProducts() {
                     </div>
                     <div className="muted">
                       {p.category || "ক্যাটাগরি নেই"} · প্রফিট ৳{p.profit} · কমিশন ৳{p.memberCommission || 0}
+                      {p.referralCommissionAmount > 0 && ` · রেফারেল কমিশন ৳${p.referralCommissionAmount}`}
                     </div>
                   </div>
                 </div>

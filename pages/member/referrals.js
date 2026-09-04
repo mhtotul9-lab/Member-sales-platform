@@ -70,7 +70,7 @@ export default function MemberReferrals() {
             <div className="card" style={{ marginBottom: 20 }}>
               <h1 style={{ fontSize: "1.25rem", marginBottom: 6 }}>রেফারেল প্রোগ্রাম</h1>
               <p className="muted" style={{ marginBottom: 16 }}>
-                আপনার Member Code নতুন কাউকে দিন — সে রেজিস্ট্রেশনের সময় এই কোড দিলে আপনি তার রেফারার হয়ে যাবেন। সে প্রথম সফল সেল করলেই আপনি ৳২০০ বোনাস পাবেন।
+                আপনার Member Code নতুন কাউকে দিন — সে রেজিস্ট্রেশনের সময় এই কোড দিলে আপনি তার রেফারার হয়ে যাবেন। সে প্রথম সফল সেল করলেই আপনি বোনাস পাবেন (কত টাকা, তা প্রোডাক্টের উপর নির্ভর করে)।
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ fontSize: "1.3rem", fontWeight: 800, fontFamily: "var(--font-display)" }}>{data.memberCode}</div>
@@ -113,7 +113,7 @@ export default function MemberReferrals() {
                       {r.firstSaleCompleted ? "✅ প্রথম সেল সম্পন্ন" : "⏳ অপেক্ষমাণ"}
                     </span>
                     <div className="muted" style={{ fontSize: "0.8rem", marginTop: 4 }}>
-                      {r.firstSaleCompleted ? "৳২০০ পেয়েছেন" : "৳০"}
+                      {r.firstSaleCompleted ? `৳${r.bonusAmount} পেয়েছেন` : "৳০"}
                     </div>
                   </div>
                 </div>
