@@ -5,7 +5,11 @@ import { auth, db } from "../lib/firebase";
 
 const AuthContext = createContext({ user: null, profile: null, loading: true });
 
-const HEARTBEAT_MS = 50 * 1000;
+const HEARTBEAT_MS = 3 * 60 * 1000; // was 50s — that combined with the live
+// profile listener below meant every heartbeat write also billed as a read
+// (a listener bills 1 read per changed doc, even for the writer's own
+// write). 3 minutes keeps "who's online" reasonably fresh while cutting
+// this cost to a fraction of what it was.
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

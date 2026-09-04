@@ -458,6 +458,12 @@ a.card:hover {
   min-height: 100vh;
 }
 
+/* Every heading inside the dark landing page defaults to white — this is
+   what was missing for the hero h1, which fell back to the app's global
+   dark --ink color (meant for light backgrounds) and became nearly
+   invisible against this dark navy background. */
+.landing h1, .landing h2, .landing h3 { color: #fff; }
+
 .landing-nav {
   display: flex;
   align-items: center;
@@ -506,6 +512,7 @@ a.card:hover {
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   line-height: 1.15;
   font-weight: 800;
+  color: #fff;
   margin-bottom: 22px;
 }
 

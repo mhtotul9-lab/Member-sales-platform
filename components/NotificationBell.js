@@ -12,7 +12,7 @@ export default function NotificationBell() {
     async function poll() {
       try {
         const token = await user.getIdToken();
-        const res = await fetch("/api/notifications", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("/api/notifications/unread-count", { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) return;
         const body = await res.json();
         if (!cancelled) setUnreadCount(body.unreadCount || 0);
@@ -22,7 +22,7 @@ export default function NotificationBell() {
     }
 
     poll();
-    const interval = setInterval(poll, 30000);
+    const interval = setInterval(poll, 120000); // was 30s — this endpoint now also runs on every page for every logged-in session, so 2 minutes keeps it cheap while still feeling reasonably live
     return () => { cancelled = true; clearInterval(interval); };
   }, [user]);
 
