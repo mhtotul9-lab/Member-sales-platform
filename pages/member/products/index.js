@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 export default function MemberProducts() {
   const { user, profile, loading } = useAuth();
@@ -74,7 +75,7 @@ export default function MemberProducts() {
           </div>
         </div>
 
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorText>{error}</ErrorText>}
         {products === null && !error && <Loading />}
         {products && filtered.length === 0 && <div className="empty-state">কোনো প্রোডাক্ট পাওয়া যায়নি।</div>}
 

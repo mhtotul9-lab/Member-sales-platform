@@ -64,7 +64,7 @@ export default function Home() {
       <section className="landing-hero">
         <div className="landing-hero-copy">
           <h1>
-            বিনা পুঁজিতে বিজনেস করে{" "}
+            বিনা পুঁজিতে প্রোডাক্ট বিক্রি করে{" "}
             <span className="landing-accent-teal">আয়</span> করুন
           </h1>
           <p>

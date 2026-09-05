@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
+import ErrorText from "../../components/ErrorText";
 
 const REPORTS = [
   { key: "orders", label: "সেলস/অর্ডার রিপোর্ট", url: "/api/admin/reports/orders", filename: "orders-report.csv" },
@@ -58,7 +59,7 @@ export default function AdminReports() {
           <h1 style={{ fontSize: "1.25rem", marginBottom: 6 }}>রিপোর্ট</h1>
           <p className="muted" style={{ marginBottom: 20 }}>CSV ফাইল হিসেবে ডাউনলোড হবে — Excel/Google Sheets-এ খোলা যাবে।</p>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
 
           {REPORTS.map((r) => (
             <div className="list-row" key={r.key}>

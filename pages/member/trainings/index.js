@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 const STATUS_LABEL = {
   not_started: { text: "শুরু হয়নি", cls: "stamp-rejected" },
@@ -67,7 +68,7 @@ export default function MemberTrainings() {
       <div className="container">
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 16 }}>ট্রেনিং</h1>
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {trainings === null && !error && <Loading />}
           {trainings && trainings.length === 0 && <div className="empty-state">এখনো কোনো ট্রেনিং যোগ করা হয়নি।</div>}
 

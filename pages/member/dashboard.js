@@ -5,6 +5,7 @@ import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
 import LiveSalesFeed from "../../components/LiveSalesFeed";
 import { ORDER_STATUS_LABELS } from "../../lib/orderStatus";
+import ErrorText from "../../components/ErrorText";
 
 export default function MemberDashboard() {
   const { user, profile, loading } = useAuth();
@@ -65,7 +66,7 @@ export default function MemberDashboard() {
         <div className="card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>আমার সেল সামারি</h2>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {!stats && !error && <Loading />}
 
           {stats && (

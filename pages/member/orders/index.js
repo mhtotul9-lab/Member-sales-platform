@@ -4,6 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS } from "../../../lib/orderStatus";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 export default function MemberOrders() {
   const { user, profile, loading } = useAuth();
@@ -44,10 +45,10 @@ export default function MemberOrders() {
         <div className="card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h1 style={{ fontSize: "1.25rem" }}>আমার অর্ডার</h1>
-            <a className="btn btn-primary" href="/member/orders/new">+ নতুন অর্ডার সাবমিট করুন</a>
+            <a className="btn btn-primary" href="/member/products">প্রোডাক্ট থেকে অর্ডার সাবমিট করুন</a>
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {orders === null && !error && <Loading />}
           {orders && orders.length === 0 && <div className="empty-state">এখনো কোনো অর্ডার সাবমিট করা হয়নি।</div>}
 
@@ -57,7 +58,11 @@ export default function MemberOrders() {
               <div className="list-row" key={o.id}>
                 <div>
                   <div style={{ fontWeight: 600 }}>{o.orderId} <span className="muted">· {o.productName}</span></div>
-                  <div className="muted">{o.customerName} · ৳{o.orderAmount} · {new Date(o.createdAt).toLocaleDateString("bn-BD")}</div>
+                  <div className="muted">
+                    {o.customerName} · ৳{o.orderAmount}
+                    {o.customerSalePrice && o.customerSalePrice !== o.orderAmount && ` (কাস্টমারকে দিয়েছেন ৳${o.customerSalePrice})`}
+                    {" "}· {new Date(o.createdAt).toLocaleDateString("bn-BD")}
+                  </div>
                   {o.status === "rejected" && o.rejectionReason && (
                     <div className="error-text" style={{ marginTop: 4 }}>কারণ: {o.rejectionReason}</div>
                   )}

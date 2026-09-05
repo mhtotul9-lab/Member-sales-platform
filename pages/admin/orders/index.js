@@ -4,6 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS, RISK_FLAG_LABELS } from "../../../lib/orderStatus";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 const FILTERS = [
   { value: "", label: "সব" },
@@ -67,30 +68,56 @@ export default function AdminOrders() {
             ))}
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {orders === null && !error && <Loading />}
           {orders && orders.length === 0 && <div className="empty-state">এই ফিল্টারে কোনো অর্ডার নেই।</div>}
 
           {orders && orders.map((o) => {
             const st = ORDER_STATUS_LABELS[o.status] || ORDER_STATUS_LABELS.submitted;
             return (
-              <div className="list-row" key={o.id}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{o.orderId} <span className="muted">· {o.productName} × {o.quantity}</span></div>
-                  <div className="muted">{o.memberName} → {o.customerName} ({o.customerPhone}) · ৳{o.orderAmount}</div>
-                  {o.riskFlags?.length > 0 && (
-                    <div style={{ marginTop: 4 }}>
-                      {o.riskFlags.map((f) => (
-                        <span key={f} className="stamp stamp-pending" style={{ marginRight: 6 }}>
-                          ⚠ {RISK_FLAG_LABELS[f] || f}
-                        </span>
-                      ))}
+              <div
+                className="list-row"
+                key={o.id}
+                onClick={() => router.push(`/admin/orders/${o.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  {o.productImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={o.productImageUrl}
+                      alt={o.productName}
+                      style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0, border: "1px solid var(--line)" }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 56, height: 56, borderRadius: 8, flexShrink: 0,
+                        background: "var(--paper)", border: "1px solid var(--line)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "var(--ink-soft)", fontSize: "0.7rem", textAlign: "center",
+                      }}
+                    >
+                      ছবি নেই
                     </div>
                   )}
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{o.orderId} <span className="muted">· {o.productName} × {o.quantity}</span></div>
+                    <div className="muted">{o.memberName} → {o.customerName} ({o.customerPhone}) · ভাউচার মূল্য ৳{o.customerSalePrice || o.orderAmount}</div>
+                    {o.riskFlags?.length > 0 && (
+                      <div style={{ marginTop: 4 }}>
+                        {o.riskFlags.map((f) => (
+                          <span key={f} className="stamp stamp-pending" style={{ marginRight: 6 }}>
+                            ⚠ {RISK_FLAG_LABELS[f] || f}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <span className={`stamp ${st.cls}`}>{st.text}</span>
-                  <a className="btn btn-outline btn-sm" href={`/admin/orders/${o.id}`}>বিস্তারিত</a>
+                  <a className="btn btn-outline btn-sm" href={`/admin/orders/${o.id}`} onClick={(e) => e.stopPropagation()}>বিস্তারিত</a>
                 </div>
               </div>
             );

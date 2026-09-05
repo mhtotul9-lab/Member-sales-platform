@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 export default function AdminTrainings() {
   const { user, profile, loading } = useAuth();
@@ -84,7 +85,7 @@ export default function AdminTrainings() {
               <label htmlFor="pdfUrl">PDF URL (ঐচ্ছিক)</label>
               <input id="pdfUrl" value={form.pdfUrl} onChange={(e) => setForm((f) => ({ ...f, pdfUrl: e.target.value }))} placeholder="https://..." />
             </div>
-            {error && <p className="error-text">{error}</p>}
+            {error && <ErrorText>{error}</ErrorText>}
             <button className="btn btn-primary" type="submit" disabled={submitting}>
               {submitting ? "সেভ হচ্ছে..." : "ট্রেনিং তৈরি করুন"}
             </button>

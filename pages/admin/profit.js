@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
+import ErrorText from "../../components/ErrorText";
 
 export default function AdminProfit() {
   const { user, profile, loading } = useAuth();
@@ -41,7 +42,7 @@ export default function AdminProfit() {
     <div className="shell">
       <Nav role="admin" active="profit" />
       <div className="container">
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorText>{error}</ErrorText>}
         {!data && !error && <Loading />}
 
         {data && (
@@ -65,10 +66,8 @@ export default function AdminProfit() {
                   <div>
                     <div style={{ fontWeight: 600 }}>{p.orderId}</div>
                     <div className="muted">
-                      পুল ৳{p.poolAmount} · {(p.entries || []).length} লেভেল-এন্ট্রি
-                      {p.distributed && (p.entries || []).length > 0
-                        ? " · " + p.entries.map((e) => `লেভেল-${e.level}: ৳${e.amount}`).join(", ")
-                        : ""}
+                      পুল ৳{p.poolAmount} · {p.eligibleMemberIds.length} জন eligible member
+                      {p.distributed ? ` · জনপ্রতি ৳${p.perMemberShare}` : ""}
                     </div>
                     {p.reversedAt && <div className="error-text" style={{ marginTop: 4 }}>রিভার্সড (রিটার্ন/রিফান্ড)</div>}
                     {!p.distributed && <div className="muted" style={{ marginTop: 4 }}>{p.note}</div>}

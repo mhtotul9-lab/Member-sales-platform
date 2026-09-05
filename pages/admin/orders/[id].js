@@ -4,6 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS, RISK_FLAG_LABELS } from "../../../lib/orderStatus";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 const ACTIONS = [
   { status: "under_review", label: "রিভিউতে নিন", cls: "btn-outline" },
@@ -86,16 +87,26 @@ export default function AdminOrderDetail() {
     <div className="shell">
       <Nav role="admin" active="orders" />
       <div className="container" style={{ maxWidth: 680 }}>
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorText>{error}</ErrorText>}
         {!order && !error && <Loading />}
 
         {order && (
           <>
             <div className="card" style={{ marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <h1 style={{ fontSize: "1.2rem", marginBottom: 4 }}>{order.orderId}</h1>
-                  <p className="muted">{new Date(order.createdAt).toLocaleString("bn-BD")}</p>
+                <div style={{ display: "flex", gap: 14 }}>
+                  {order.productImageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={order.productImageUrl}
+                      alt={order.productName}
+                      style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 10, flexShrink: 0, border: "1px solid var(--line)" }}
+                    />
+                  )}
+                  <div>
+                    <h1 style={{ fontSize: "1.2rem", marginBottom: 4 }}>{order.orderId}</h1>
+                    <p className="muted">{new Date(order.createdAt).toLocaleString("bn-BD")}</p>
+                  </div>
                 </div>
                 <span className={`stamp ${(ORDER_STATUS_LABELS[order.status] || {}).cls || "stamp-pending"}`}>
                   {(ORDER_STATUS_LABELS[order.status] || {}).text || order.status}
@@ -115,7 +126,8 @@ export default function AdminOrderDetail() {
               <div className="form-grid-2" style={{ fontSize: "0.94rem" }}>
                 <div><span className="muted">মেম্বার:</span> {order.memberName}</div>
                 <div><span className="muted">প্রোডাক্ট:</span> {order.productName} × {order.quantity}</div>
-                <div><span className="muted">অর্ডার মূল্য:</span> ৳{order.orderAmount}</div>
+                <div><span className="muted">অর্ডার মূল্য (ক্যাটালগ):</span> ৳{order.orderAmount}</div>
+                <div><span className="muted">ভাউচারে যা লিখবেন:</span> <b>৳{order.customerSalePrice || order.orderAmount}</b></div>
                 <div><span className="muted">কোম্পানি প্রফিট:</span> ৳{order.profitAtOrder}</div>
                 <div><span className="muted">মেম্বার কমিশন:</span> ৳{order.commissionAtOrder || 0}</div>
                 <div><span className="muted">মার্কেটিং সোর্স:</span> {order.marketingSource}</div>

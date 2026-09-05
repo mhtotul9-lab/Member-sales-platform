@@ -76,6 +76,23 @@ async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
+  if (req.method === "DELETE") {
+    const current = snap.data();
+    await ref.delete();
+
+    await adminDb.collection("auditLogs").add({
+      actor: decoded.uid,
+      actorEmail: decoded.email || null,
+      action: "product.delete",
+      entity: "products",
+      entityId: id,
+      before: { name: current.name, sku: current.sku },
+      timestamp: new Date().toISOString(),
+    });
+
+    return res.status(200).json({ ok: true });
+  }
+
   return res.status(405).json({ error: "Method not allowed" });
 }
 

@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
+import ErrorText from "../../components/ErrorText";
 
 const TXN_LABEL = {
   referral_bonus: { text: "রেফারেল বোনাস", cls: "stamp-active" },
@@ -46,7 +47,7 @@ export default function AdminReferrals() {
     <div className="shell">
       <Nav role="admin" active="referrals" />
       <div className="container">
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorText>{error}</ErrorText>}
         {!data && !error && <Loading />}
 
         {data && (

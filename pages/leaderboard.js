@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../contexts/AuthContext";
 import Nav from "../components/Nav";
 import Loading from "../components/Loading";
+import ErrorText from "../components/ErrorText";
 
 const TABS = [
   { value: "week", label: "সাপ্তাহিক" },
@@ -61,7 +62,7 @@ export default function Leaderboard() {
             ))}
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {rows === null && !error && <Loading />}
           {rows && rows.length === 0 && <div className="empty-state">এই সময়ে কোনো ভ্যালিড সেল নেই।</div>}
 

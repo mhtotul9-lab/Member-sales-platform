@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 const STATUS_LABEL = {
   pending: { text: "পেন্ডিং", cls: "stamp-pending" },
@@ -71,7 +72,7 @@ export default function AdminWithdrawals() {
       <div className="container">
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 20 }}>উইথড্র ম্যানেজমেন্ট</h1>
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {withdrawals === null && !error && <Loading />}
           {withdrawals && withdrawals.length === 0 && <div className="empty-state">কোনো উইথড্র রিকোয়েস্ট নেই।</div>}
 

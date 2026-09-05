@@ -4,6 +4,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
 import { timeAgo } from "../../lib/timeAgo";
+import ErrorText from "../../components/ErrorText";
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -62,7 +63,7 @@ export default function MemberReferrals() {
     <div className="shell">
       <Nav role={profile.role} active="referrals" />
       <div className="container">
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorText>{error}</ErrorText>}
         {!data && !error && <Loading />}
 
         {data && (
@@ -70,7 +71,7 @@ export default function MemberReferrals() {
             <div className="card" style={{ marginBottom: 20 }}>
               <h1 style={{ fontSize: "1.25rem", marginBottom: 6 }}>রেফারেল প্রোগ্রাম</h1>
               <p className="muted" style={{ marginBottom: 16 }}>
-                আপনার Member Code নতুন কাউকে দিন — সে রেজিস্ট্রেশনের সময় এই কোড দিলে আপনি তার রেফারার হয়ে যাবেন। সে প্রয়োজনীয় সংখ্যক সফল সেল সম্পন্ন করলেই আপনি একবারের জন্য Direct Referral Commission পাবেন, আর এরপর সে যতবারই সেল করবে, ততবারই আপনি Profit Pool Share পাবেন (অ্যাডমিন প্যানেলে সেট করা হার অনুযায়ী)।
+                আপনার Member Code নতুন কাউকে দিন — সে রেজিস্ট্রেশনের সময় এই কোড দিলে আপনি তার রেফারার হয়ে যাবেন। সে প্রথম সফল সেল করলেই আপনি বোনাস পাবেন (কত টাকা, তা প্রোডাক্টের উপর নির্ভর করে)।
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ fontSize: "1.3rem", fontWeight: 800, fontFamily: "var(--font-display)" }}>{data.memberCode}</div>

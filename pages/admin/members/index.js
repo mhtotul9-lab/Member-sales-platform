@@ -4,6 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
 import { timeAgo } from "../../../lib/timeAgo";
+import ErrorText from "../../../components/ErrorText";
 
 const STATUS_FILTERS = [
   { value: "", label: "সব" },
@@ -24,7 +25,7 @@ const ACCOUNT_STATUS_LABEL = {
   rejected: { text: "রিজেক্টেড", cls: "stamp-rejected" },
 };
 
-const ONLINE_WINDOW_MS = 6 * 60 * 1000; // widened to match the slower 3-minute heartbeat, so a member doesn't flicker to "offline" between beats
+const ONLINE_WINDOW_MS = 2 * 60 * 1000;
 
 function isOnline(lastActiveAt) {
   if (!lastActiveAt) return false;
@@ -169,7 +170,7 @@ export default function AdminMembers() {
             style={{ width: "100%", padding: "10px 13px", border: "1px solid var(--line)", borderRadius: 7, marginBottom: 18 }}
           />
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {members === null && !error && <Loading />}
           {members && filtered.length === 0 && <div className="empty-state">কোনো মেম্বার পাওয়া যায়নি।</div>}
 

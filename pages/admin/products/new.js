@@ -9,6 +9,7 @@ export default function NewProduct() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [defaults, setDefaults] = useState(null);
 
   useEffect(() => {
     if (loading) return;
@@ -16,6 +17,25 @@ export default function NewProduct() {
     if (!profile || profile.status !== "active") { router.replace("/pending"); return; }
     if (profile.role !== "admin") { router.replace("/member/dashboard"); return; }
   }, [user, profile, loading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/admin/settings", { headers: { Authorization: `Bearer ${token}` } });
+        const body = await res.json();
+        if (res.ok) {
+          setDefaults({
+            memberCommission: body.settings.defaultMemberCommission ?? 0,
+            referralCommissionAmount: body.settings.defaultReferralCommission ?? 0,
+          });
+        }
+      } catch {
+        // non-critical — form just falls back to blank/0 fields
+      }
+    })();
+  }, [user]);
 
   async function handleSubmit(values) {
     setError("");
@@ -45,7 +65,11 @@ export default function NewProduct() {
       <div className="container" style={{ maxWidth: 640 }}>
         <div className="card">
           <h1 style={{ fontSize: "1.25rem", marginBottom: 20 }}>নতুন প্রোডাক্ট যোগ করুন</h1>
-          <ProductForm submitting={submitting} error={error} onSubmit={handleSubmit} submitLabel="প্রোডাক্ট তৈরি করুন" />
+          {defaults ? (
+            <ProductForm initial={defaults} submitting={submitting} error={error} onSubmit={handleSubmit} submitLabel="প্রোডাক্ট তৈরি করুন" />
+          ) : (
+            <p className="muted">লোড হচ্ছে...</p>
+          )}
         </div>
       </div>
     </div>

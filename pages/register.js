@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import Logo from "../components/Logo";
+import ErrorText from "../components/ErrorText";
 
 function FieldIcon({ path }) {
   return (
@@ -258,7 +259,7 @@ export default function Register() {
               </div>
             </div>
 
-            {error && <p className="error-text">{error}</p>}
+            {error && <ErrorText>{error}</ErrorText>}
 
             <button className="auth-submit-btn btn" type="submit" disabled={submitting}>
               {submitting ? "প্রসেস হচ্ছে..." : "রেজিস্ট্রেশন সম্পন্ন করুন"}

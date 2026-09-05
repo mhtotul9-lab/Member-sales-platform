@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 const METHOD_LABELS = {
   bkash: "বিকাশ", nagad: "নগদ", rocket: "রকেট", bank: "ব্যাংক ট্রান্সফার",
@@ -110,7 +111,7 @@ export default function MemberWithdrawals() {
               <label htmlFor="accountNumber">অ্যাকাউন্ট / ওয়ালেট নম্বর</label>
               <input id="accountNumber" required value={form.accountNumber} onChange={(e) => setForm((f) => ({ ...f, accountNumber: e.target.value }))} />
             </div>
-            {error && <p className="error-text">{error}</p>}
+            {error && <ErrorText>{error}</ErrorText>}
             <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%", marginTop: 6 }}>
               {submitting ? "সাবমিট হচ্ছে..." : "রিকোয়েস্ট সাবমিট করুন"}
             </button>

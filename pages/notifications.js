@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Nav from "../components/Nav";
 import Logo from "../components/Logo";
 import Loading from "../components/Loading";
+import ErrorText from "../components/ErrorText";
 
 export default function Notifications() {
   const { user, profile, loading } = useAuth();
@@ -83,7 +84,7 @@ export default function Notifications() {
             )}
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {notifications === null && !error && <Loading />}
           {notifications && notifications.length === 0 && <div className="empty-state">কোনো নোটিফিকেশন নেই।</div>}
 

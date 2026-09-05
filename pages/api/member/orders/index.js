@@ -1,6 +1,5 @@
 import { requireActiveMember, adminDb, nextOrderId } from "../../../../lib/firebaseAdmin";
 import { notifyAdmins } from "../../../../lib/notify";
-import { getSettings } from "../../../../lib/business";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
 
 function normalizePhone(phone) {
@@ -28,13 +27,18 @@ async function handler(req, res) {
 
   if (req.method === "POST") {
     const body = req.body || {};
-    const { productId, customerName, customerPhone, customerWhatsapp, customerAddress, quantity, marketingSource, notes, proofUrl } = body;
+    const { productId, customerName, customerPhone, customerWhatsapp, customerAddress, quantity, marketingSource, notes, proofUrl, customerSalePrice } = body;
 
     if (!productId || !customerName || !customerPhone || !quantity) {
       return res.status(400).json({ error: "প্রোডাক্ট, কাস্টমারের নাম, ফোন নম্বর ও পরিমাণ দিতে হবে।" });
     }
     const qty = Number(quantity);
     if (isNaN(qty) || qty <= 0) return res.status(400).json({ error: "সঠিক পরিমাণ দিন।" });
+
+    if (customerSalePrice === undefined || customerSalePrice === "" || isNaN(Number(customerSalePrice)) || Number(customerSalePrice) <= 0) {
+      return res.status(400).json({ error: "কাস্টমারকে কত টাকায় বিক্রি করেছেন তা দিতে হবে (ভাউচারের জন্য প্রয়োজন)।" });
+    }
+    const customerSalePriceNum = Number(customerSalePrice);
 
     const productSnap = await adminDb.collection("products").doc(productId).get();
     if (!productSnap.exists || productSnap.data().status !== "active") {
@@ -51,12 +55,7 @@ async function handler(req, res) {
     const costPriceAtOrder = Number(product.costPrice) || 0;
     const profitAtOrder = Number((orderAmount - costPriceAtOrder * qty).toFixed(2));
     const commissionAtOrder = Number(((Number(product.memberCommission) || 0) * qty).toFixed(2));
-    // Direct Referral Commission is now a single platform-wide admin setting
-    // (not per-product) — snapshotted here at order-submit time so a later
-    // change to the setting never rewrites a bonus that's already in
-    // flight for this order.
-    const settings = await getSettings();
-    const referralCommissionAtOrder = Number(settings.directReferralCommission) || 0;
+    const referralCommissionAtOrder = Number(product.referralCommissionAmount) || 0;
     const normalizedPhone = normalizePhone(customerPhone);
 
     // --- Duplicate / fraud checks -------------------------------------
@@ -115,6 +114,7 @@ async function handler(req, res) {
       unitPrice: product.sellingPrice,
       quantity: qty,
       orderAmount,
+      customerSalePrice: customerSalePriceNum,
       costPriceAtOrder,
       profitAtOrder,
       commissionAtOrder,

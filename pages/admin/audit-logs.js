@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Nav from "../../components/Nav";
 import Loading from "../../components/Loading";
+import ErrorText from "../../components/ErrorText";
 
 const ENTITY_FILTERS = [
   { value: "", label: "সব" },
@@ -74,7 +75,7 @@ export default function AuditLogs() {
             ))}
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           {logs === null && !error && <Loading />}
           {logs && logs.length === 0 && <div className="empty-state">কোনো লগ পাওয়া যায়নি।</div>}
 

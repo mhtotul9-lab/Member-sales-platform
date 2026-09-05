@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../../contexts/AuthContext";
 import Nav from "../../../components/Nav";
 import Loading from "../../../components/Loading";
+import ErrorText from "../../../components/ErrorText";
 
 export default function AdminTrainingDetail() {
   const { user, profile, loading } = useAuth();
@@ -68,7 +69,7 @@ export default function AdminTrainingDetail() {
           {completedCount !== null && <p className="muted" style={{ marginBottom: 20 }}>{completedCount} জন মেম্বার সম্পন্ন করেছে</p>}
 
           {!form && !error && <Loading />}
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
 
           {form && (
             <form onSubmit={handleSubmit}>

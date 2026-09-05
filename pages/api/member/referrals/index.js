@@ -19,22 +19,31 @@ async function handler(req, res) {
 
   const referredRaw = referredSnap.docs.map((d) => ({ uid: d.id, ...d.data() }));
 
-  // The bonus amount can change over time (it's now an admin-configurable
-  // setting), so each referred member's actual paid amount is snapshotted
-  // onto their own member doc (referralCommissionAmountPaid) at the moment
-  // their bonus fires — no need to query transactions per referred member.
-  const referred = referredRaw
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map((m) => ({
-      uid: m.uid,
-      fullName: m.fullName,
-      memberId: m.memberId,
-      createdAt: m.createdAt,
-      qualifyingSalesCount: m.qualifyingSalesCount || 0,
-      firstSaleCompleted: !!m.referralCommissionPaid,
-      firstSaleAt: m.firstSaleAt || null,
-      bonusAmount: m.referralCommissionPaid ? (m.referralCommissionAmountPaid || 0) : 0,
-    }));
+  const referred = await Promise.all(
+    referredRaw
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(async (m) => {
+        let bonusAmount = 0;
+        if (m.firstSaleCompleted) {
+          const txnSnap = await adminDb
+            .collection("transactions")
+            .where("refMemberId", "==", m.uid)
+            .where("type", "==", "referral_bonus")
+            .limit(1)
+            .get();
+          if (!txnSnap.empty) bonusAmount = txnSnap.docs[0].data().amount;
+        }
+        return {
+          uid: m.uid,
+          fullName: m.fullName,
+          memberId: m.memberId,
+          createdAt: m.createdAt,
+          firstSaleCompleted: !!m.firstSaleCompleted,
+          firstSaleAt: m.firstSaleAt || null,
+          bonusAmount,
+        };
+      })
+  );
 
   return res.status(200).json({
     memberCode: profile.memberId,
