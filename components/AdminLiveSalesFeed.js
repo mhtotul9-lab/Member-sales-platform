@@ -15,7 +15,7 @@ export default function AdminLiveSalesFeed() {
       collection(db, "orders"),
       where("status", "in", VALID_SALE_STATUSES),
       orderBy("approvedAt", "desc"),
-      limit(10)
+      limit(2)
     );
     const unsub = onSnapshot(q, (snap) => {
       const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
