@@ -20,7 +20,7 @@ const emptyForm = {
   fullDescription: "",
   mainImageUrl: "",
   imageUrlsText: "",
-  videoUrl: "",
+  videoUrlsText: "",
   shortCaption: "",
   longCaption: "",
   whatsappMessage: "",
@@ -37,6 +37,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           memberCommission: String(initial.memberCommission ?? ""),
           referralCommissionAmount: String(initial.referralCommissionAmount ?? ""),
           imageUrlsText: (initial.imageUrls || []).join("\n"),
+          videoUrlsText: (initial.videoUrls || []).join("\n"),
         }
       : {}),
   });
@@ -60,7 +61,7 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       fullDescription: form.fullDescription,
       mainImageUrl: form.mainImageUrl,
       imageUrls: form.imageUrlsText.split("\n").map((s) => s.trim()).filter(Boolean),
-      videoUrl: form.videoUrl,
+      videoUrls: form.videoUrlsText.split("\n").map((s) => s.trim()).filter(Boolean),
       shortCaption: form.shortCaption,
       longCaption: form.longCaption,
       whatsappMessage: form.whatsappMessage,
@@ -143,8 +144,8 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
         <textarea id="imageUrlsText" rows={3} value={form.imageUrlsText} onChange={(e) => update("imageUrlsText", e.target.value)} placeholder={"https://...\nhttps://..."} />
       </div>
       <div className="field">
-        <label htmlFor="videoUrl">ভিডিও URL (YouTube লিংক)</label>
-        <input id="videoUrl" value={form.videoUrl} onChange={(e) => update("videoUrl", e.target.value)} placeholder="https://youtu.be/..." />
+        <label htmlFor="videoUrlsText">ভিডিও URL (একাধিক দিতে চাইলে প্রতি লাইনে একটা করে)</label>
+        <textarea id="videoUrlsText" rows={3} value={form.videoUrlsText} onChange={(e) => update("videoUrlsText", e.target.value)} placeholder={"https://youtu.be/...\nhttps://youtu.be/..."} />
       </div>
 
       <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "22px 0" }} />
