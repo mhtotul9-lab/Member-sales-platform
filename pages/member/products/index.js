@@ -112,7 +112,7 @@ export default function MemberProducts() {
         {products === null && !error && <Loading />}
         {products && filtered.length === 0 && <div className="empty-state">কোনো প্রোডাক্ট পাওয়া যায়নি।</div>}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+        <div className="product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
           {visible.map((p) => {
             const outOfStock = p.status === "out_of_stock";
             return (

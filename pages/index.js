@@ -71,7 +71,7 @@ export default function Home() {
             জলরাশির মেম্বার হয়ে প্রোডাক্ট মার্কেটিং করুন, অর্ডার সংগ্রহ করুন, আর প্রতিটা ভ্যালিড সেল থেকে সরাসরি নিজের ওয়ালেটে প্রফিট নিন। রেজিস্ট্রেশন সম্পূর্ণ ফ্রি, কোনো স্টক রাখতে হবে না।
           </p>
           <div className="landing-cta-row">
-            <a href="/register" className="landing-btn-primary">মেম্বার হিসেবে যুক্ত হন →</a>
+            <a href="/register" className="landing-btn-primary">রেজিস্ট্রেশন করুন →</a>
             <a href="/login" className="landing-btn-outline">লগইন করুন</a>
           </div>
           <div className="landing-reputation">
@@ -107,6 +107,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="landing-section landing-video-section">
+        <video
+          className="landing-video"
+          src="/videos/intro.mp4"
+          controls
+          playsInline
+          preload="metadata"
+        />
       </section>
 
       <section className="landing-section" id="why">
