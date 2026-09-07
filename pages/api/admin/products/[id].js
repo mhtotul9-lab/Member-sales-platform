@@ -1,5 +1,6 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
+import { validateProductProfitSafety } from "../../../../lib/business";
 
 const STATUSES = ["active", "inactive", "out_of_stock", "archived"];
 
@@ -26,12 +27,13 @@ async function handler(req, res) {
 
     const stringFields = [
       "name", "sku", "category", "shortDescription", "fullDescription",
-      "mainImageUrl", "videoUrl", "shortCaption", "longCaption", "whatsappMessage",
+      "mainImageUrl", "shortCaption", "longCaption", "whatsappMessage",
     ];
     for (const field of stringFields) {
       if (body[field] !== undefined) update[field] = String(body[field]);
     }
     if (Array.isArray(body.imageUrls)) update.imageUrls = body.imageUrls.filter(Boolean);
+    if (Array.isArray(body.videoUrls)) update.videoUrls = body.videoUrls.filter(Boolean);
 
     if (body.status !== undefined) {
       if (!STATUSES.includes(body.status)) return res.status(400).json({ error: "অবৈধ status।" });
@@ -48,16 +50,27 @@ async function handler(req, res) {
       update.profit = Number((sellingPrice - costPrice).toFixed(2));
     }
 
+    let memberCommission = current.memberCommission;
     if (body.memberCommission !== undefined) {
-      const memberCommission = Number(body.memberCommission);
+      memberCommission = Number(body.memberCommission);
       if (isNaN(memberCommission) || memberCommission < 0) return res.status(400).json({ error: "সঠিক মেম্বার কমিশন দিন (প্রতি ইউনিট)।" });
       update.memberCommission = memberCommission;
     }
 
+    let referralCommissionAmount = current.referralCommissionAmount || 0;
     if (body.referralCommissionAmount !== undefined) {
-      const referralCommissionAmount = Number(body.referralCommissionAmount);
+      referralCommissionAmount = Number(body.referralCommissionAmount);
       if (isNaN(referralCommissionAmount) || referralCommissionAmount < 0) return res.status(400).json({ error: "সঠিক রেফারেল কমিশন দিন।" });
       update.referralCommissionAmount = referralCommissionAmount;
+    }
+
+    // Only re-check profit safety when a field that affects the math is
+    // actually changing — a plain status toggle (e.g. marking out of stock)
+    // shouldn't get blocked by this.
+    const touchesMoney = ["sellingPrice", "costPrice", "memberCommission", "referralCommissionAmount"].some((f) => body[f] !== undefined);
+    if (touchesMoney) {
+      const safetyError = await validateProductProfitSafety({ sellingPrice, costPrice, memberCommission, referralCommissionAmount });
+      if (safetyError) return res.status(400).json({ error: safetyError });
     }
 
     await ref.update(update);

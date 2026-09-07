@@ -78,9 +78,8 @@ function OrderForm({ product, user, onDone }) {
   const [form, setForm] = useState({
     customerName: "", customerPhone: "", customerWhatsapp: "",
     customerAddress: "", quantity: "1", marketingSource: "facebook",
-    notes: "", proofUrl: "", customerSalePrice: "",
+    notes: "", proofUrl: "", customerUnitPrice: String(product.sellingPrice),
   });
-  const [touchedPrice, setTouchedPrice] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -88,14 +87,9 @@ function OrderForm({ product, user, onDone }) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  // Keep the suggested sale price in sync with quantity × catalog price,
-  // unless the member has already typed their own negotiated price.
-  useEffect(() => {
-    if (touchedPrice) return;
-    const qty = Number(form.quantity || 0);
-    if (qty > 0) update("customerSalePrice", (product.sellingPrice * qty).toFixed(2));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.quantity, touchedPrice]);
+  const qty = Number(form.quantity || 0);
+  const unitPrice = Number(form.customerUnitPrice || 0);
+  const totalAmount = qty > 0 && unitPrice > 0 ? (qty * unitPrice).toFixed(2) : "0.00";
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -126,19 +120,24 @@ function OrderForm({ product, user, onDone }) {
       </div>
 
       <div className="field">
-        <label htmlFor="customerSalePrice">কাস্টমারকে কত টাকায় বিক্রি করেছেন (৳)</label>
+        <label htmlFor="customerUnitPrice">কাস্টমারকে প্রতি ইউনিট কত টাকায় বিক্রি করেছেন (৳)</label>
         <input
-          id="customerSalePrice"
+          id="customerUnitPrice"
           type="number"
           step="0.01"
           min="0.01"
           required
-          value={form.customerSalePrice}
-          onChange={(e) => { setTouchedPrice(true); update("customerSalePrice", e.target.value); }}
+          value={form.customerUnitPrice}
+          onChange={(e) => update("customerUnitPrice", e.target.value)}
         />
         <p className="help-text" style={{ marginTop: 6 }}>
-          এটা ডেলিভারি ভাউচারে বসানোর জন্য — ক্যাটালগ প্রাইস থেকে দরকষাকষি করে কম/বেশিতে বিক্রি করে থাকলে এখানে আসল বিক্রয়মূল্য লিখুন।
+          ক্যাটালগ প্রাইস থেকে দরকষাকষি করে কম/বেশিতে বিক্রি করে থাকলে এখানে আসল প্রতি-ইউনিট বিক্রয়মূল্য লিখুন।
         </p>
+      </div>
+
+      <div style={{ background: "var(--paper)", borderRadius: 8, padding: "12px 14px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span className="muted">মোট বিক্রয়মূল্য (ভাউচারের জন্য)</span>
+        <b style={{ fontSize: "1.1rem" }}>৳{totalAmount}</b>
       </div>
 
       <div className="field">
@@ -190,6 +189,7 @@ export default function MemberProductDetail() {
   const [error, setError] = useState("");
   const [orderOpen, setOrderOpen] = useState(false);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [activeImage, setActiveImage] = useState(null);
 
   useEffect(() => {
     if (loading) return;
@@ -216,6 +216,7 @@ export default function MemberProductDetail() {
 
   const getToken = () => user.getIdToken();
   const slug = (product?.name || "product").replace(/[^a-zA-Z0-9\u0980-\u09FF]+/g, "-").slice(0, 40);
+  const galleryImages = product ? [product.mainImageUrl, ...(product.imageUrls || [])].filter(Boolean) : [];
 
   return (
     <div className="shell">
@@ -229,12 +230,30 @@ export default function MemberProductDetail() {
             <div className="card" style={{ marginBottom: 20 }}>
               {product.mainImageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.mainImageUrl} alt={product.name} style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 8, marginBottom: 18 }} />
+                <img src={activeImage || product.mainImageUrl} alt={product.name} style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 8, marginBottom: 10 }} />
+              )}
+              {galleryImages.length > 1 && (
+                <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 18, paddingBottom: 4 }}>
+                  {galleryImages.map((url, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={url}
+                      alt={`${product.name} ${i + 1}`}
+                      onClick={() => setActiveImage(url)}
+                      style={{
+                        width: 60, height: 60, objectFit: "cover", borderRadius: 6, cursor: "pointer", flexShrink: 0,
+                        border: (activeImage || product.mainImageUrl) === url ? "2px solid var(--teal)" : "1px solid var(--line)",
+                      }}
+                    />
+                  ))}
+                </div>
               )}
               <h1 style={{ fontSize: "1.35rem", marginBottom: 6 }}>{product.name}</h1>
               <div className="muted" style={{ marginBottom: 6 }}>৳{product.sellingPrice} {product.category && `· ${product.category}`}</div>
-              <div style={{ marginBottom: 14 }}>
+              <div style={{ marginBottom: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span className="stamp stamp-active">এই প্রোডাক্ট সেল করলে কমিশন ৳{product.memberCommission || 0}</span>
+                {product.status === "out_of_stock" && <span className="stamp stamp-rejected">স্টক শেষ</span>}
               </div>
               <div style={{ marginBottom: 14, display: "flex", gap: 10 }}>
                 <CopyButton text={product.name} label="প্রোডাক্টের নাম কপি করুন" />
@@ -252,7 +271,11 @@ export default function MemberProductDetail() {
                 </div>
               )}
 
-              {!orderOpen && !justSubmitted && (
+              {product.status === "out_of_stock" ? (
+                <button className="btn btn-outline" style={{ width: "100%" }} disabled>
+                  স্টক শেষ — এখন অর্ডার করা যাবে না
+                </button>
+              ) : !orderOpen && !justSubmitted && (
                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => setOrderOpen(true)}>
                   এই প্রোডাক্টের অর্ডার সাবমিট করুন
                 </button>
@@ -287,11 +310,13 @@ export default function MemberProductDetail() {
                 {(product.imageUrls || []).map((url, i) => (
                   <DownloadButton key={i} url={url} filename={`${slug}-${i + 1}.jpg`} label={`ছবি ${i + 1} ডাউনলোড`} getToken={getToken} />
                 ))}
-                {product.videoUrl && (
-                  <a className="btn btn-outline btn-sm" href={product.videoUrl} target="_blank" rel="noreferrer">ভিডিও দেখুন</a>
-                )}
+                {(product.videoUrls || []).map((url, i) => (
+                  <a key={i} className="btn btn-outline btn-sm" href={url} target="_blank" rel="noreferrer">
+                    ভিডিও {(product.videoUrls || []).length > 1 ? i + 1 : ""} দেখুন
+                  </a>
+                ))}
               </div>
-              {!product.mainImageUrl && !(product.imageUrls || []).length && !product.videoUrl && (
+              {!product.mainImageUrl && !(product.imageUrls || []).length && !(product.videoUrls || []).length && (
                 <p className="muted">এই প্রোডাক্টের জন্য এখনো মিডিয়া যোগ করা হয়নি।</p>
               )}
             </div>

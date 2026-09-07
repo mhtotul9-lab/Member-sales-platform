@@ -12,7 +12,7 @@ async function handler(req, res) {
 
   const { id } = req.query;
   const snap = await adminDb.collection("products").doc(id).get();
-  if (!snap.exists || snap.data().status !== "active") {
+  if (!snap.exists || !["active", "out_of_stock"].includes(snap.data().status)) {
     return res.status(404).json({ error: "প্রোডাক্ট পাওয়া যায়নি।" });
   }
 

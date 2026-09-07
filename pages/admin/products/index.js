@@ -44,12 +44,11 @@ export default function AdminProducts() {
     if (profile?.role === "admin" && profile.status === "active") load();
   }, [profile, load]);
 
-  async function toggleStock(p, e) {
+  async function setStatus(p, nextStatus, e) {
     e.stopPropagation();
     setActingOn(p.id);
     try {
       const token = await user.getIdToken();
-      const nextStatus = p.status === "out_of_stock" ? "active" : "out_of_stock";
       const res = await fetch(`/api/admin/products/${p.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -147,9 +146,14 @@ export default function AdminProducts() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <span className={`stamp ${st.cls}`}>{st.text}</span>
-                  <button className="btn btn-outline btn-sm" disabled={actingOn === p.id} onClick={(e) => toggleStock(p, e)}>
+                  <button className="btn btn-outline btn-sm" disabled={actingOn === p.id} onClick={(e) => setStatus(p, p.status === "out_of_stock" ? "active" : "out_of_stock", e)}>
                     {p.status === "out_of_stock" ? "স্টক আছে করুন" : "স্টক শেষ"}
                   </button>
+                  {p.status !== "out_of_stock" && (
+                    <button className="btn btn-outline btn-sm" disabled={actingOn === p.id} onClick={(e) => setStatus(p, p.status === "inactive" ? "active" : "inactive", e)}>
+                      {p.status === "inactive" ? "অ্যাক্টিভ করুন" : "ইনঅ্যাক্টিভ করুন"}
+                    </button>
+                  )}
                   <a className="btn btn-outline btn-sm" href={`/admin/products/${p.id}`} onClick={(e) => e.stopPropagation()}>এডিট</a>
                   <button className="btn btn-danger btn-sm" disabled={actingOn === p.id} onClick={(e) => deleteProduct(p, e)}>ডিলিট</button>
                 </div>

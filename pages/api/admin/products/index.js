@@ -1,5 +1,6 @@
 import { requireAdmin, adminDb } from "../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
+import { validateProductProfitSafety } from "../../../../lib/business";
 
 const STATUSES = ["active", "inactive", "out_of_stock", "archived"];
 
@@ -33,6 +34,10 @@ async function handler(req, res) {
     const sellingPrice = Number(body.sellingPrice);
     const costPrice = Number(body.costPrice);
     const memberCommission = Number(body.memberCommission);
+    const referralCommissionAmount = Number(body.referralCommissionAmount) || 0;
+
+    const safetyError = await validateProductProfitSafety({ sellingPrice, costPrice, memberCommission, referralCommissionAmount });
+    if (safetyError) return res.status(400).json({ error: safetyError });
 
     const doc = {
       name: String(body.name).trim(),
@@ -44,11 +49,11 @@ async function handler(req, res) {
       costPrice,
       profit: Number((sellingPrice - costPrice).toFixed(2)),
       memberCommission,
-      referralCommissionAmount: Number(body.referralCommissionAmount) || 0,
+      referralCommissionAmount,
       status: STATUSES.includes(body.status) ? body.status : "active",
       mainImageUrl: body.mainImageUrl || "",
       imageUrls: Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [],
-      videoUrl: body.videoUrl || "",
+      videoUrls: Array.isArray(body.videoUrls) ? body.videoUrls.filter(Boolean) : [],
       shortCaption: body.shortCaption || "",
       longCaption: body.longCaption || "",
       whatsappMessage: body.whatsappMessage || "",

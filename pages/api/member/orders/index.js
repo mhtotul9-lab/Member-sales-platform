@@ -1,6 +1,7 @@
 import { requireActiveMember, adminDb, nextOrderId } from "../../../../lib/firebaseAdmin";
 import { notifyAdmins } from "../../../../lib/notify";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
+import { getSettings } from "../../../../lib/business";
 
 function normalizePhone(phone) {
   return String(phone || "").replace(/[^0-9]/g, "");
@@ -27,7 +28,7 @@ async function handler(req, res) {
 
   if (req.method === "POST") {
     const body = req.body || {};
-    const { productId, customerName, customerPhone, customerWhatsapp, customerAddress, quantity, marketingSource, notes, proofUrl, customerSalePrice } = body;
+    const { productId, customerName, customerPhone, customerWhatsapp, customerAddress, quantity, marketingSource, notes, proofUrl, customerUnitPrice } = body;
 
     if (!productId || !customerName || !customerPhone || !quantity) {
       return res.status(400).json({ error: "প্রোডাক্ট, কাস্টমারের নাম, ফোন নম্বর ও পরিমাণ দিতে হবে।" });
@@ -35,10 +36,11 @@ async function handler(req, res) {
     const qty = Number(quantity);
     if (isNaN(qty) || qty <= 0) return res.status(400).json({ error: "সঠিক পরিমাণ দিন।" });
 
-    if (customerSalePrice === undefined || customerSalePrice === "" || isNaN(Number(customerSalePrice)) || Number(customerSalePrice) <= 0) {
-      return res.status(400).json({ error: "কাস্টমারকে কত টাকায় বিক্রি করেছেন তা দিতে হবে (ভাউচারের জন্য প্রয়োজন)।" });
+    if (customerUnitPrice === undefined || customerUnitPrice === "" || isNaN(Number(customerUnitPrice)) || Number(customerUnitPrice) <= 0) {
+      return res.status(400).json({ error: "কাস্টমারকে প্রতি ইউনিট কত টাকায় বিক্রি করেছেন তা দিতে হবে (ভাউচারের জন্য প্রয়োজন)।" });
     }
-    const customerSalePriceNum = Number(customerSalePrice);
+    const customerUnitPriceNum = Number(customerUnitPrice);
+    const customerSalePriceNum = Number((customerUnitPriceNum * qty).toFixed(2));
 
     const productSnap = await adminDb.collection("products").doc(productId).get();
     if (!productSnap.exists || productSnap.data().status !== "active") {
@@ -55,6 +57,8 @@ async function handler(req, res) {
     const costPriceAtOrder = Number(product.costPrice) || 0;
     const profitAtOrder = Number((orderAmount - costPriceAtOrder * qty).toFixed(2));
     const commissionAtOrder = Number(((Number(product.memberCommission) || 0) * qty).toFixed(2));
+    const settings = await getSettings();
+    const poolShareAtOrder = Number(settings.profitPoolShareAmount) || 0;
     const referralCommissionAtOrder = Number(product.referralCommissionAmount) || 0;
     const normalizedPhone = normalizePhone(customerPhone);
 
@@ -114,10 +118,12 @@ async function handler(req, res) {
       unitPrice: product.sellingPrice,
       quantity: qty,
       orderAmount,
+      customerUnitPrice: customerUnitPriceNum,
       customerSalePrice: customerSalePriceNum,
       costPriceAtOrder,
       profitAtOrder,
       commissionAtOrder,
+      poolShareAtOrder,
       referralCommissionAtOrder,
       customerName,
       customerPhone,

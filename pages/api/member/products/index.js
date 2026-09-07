@@ -12,7 +12,7 @@ async function handler(req, res) {
 
   const snap = await adminDb
     .collection("products")
-    .where("status", "==", "active")
+    .where("status", "in", ["active", "out_of_stock"])
     .orderBy("createdAt", "desc")
     .get();
 
