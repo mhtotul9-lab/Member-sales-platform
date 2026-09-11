@@ -68,6 +68,14 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
     });
   }
 
+  const imageUrlsList = form.imageUrlsText.split("\n").map((s) => s.trim()).filter(Boolean);
+  const videoUrlsList = form.videoUrlsText.split("\n").map((s) => s.trim()).filter(Boolean);
+
+  function getYoutubeEmbedUrl(url) {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-grid-2">
@@ -125,19 +133,61 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       <hr style={{ border: "none", borderTop: "1px solid var(--line)", margin: "22px 0" }} />
       <p className="muted" style={{ marginBottom: 14 }}>মিডিয়া (external URL — ImgBB, Cloudinary, YouTube ইত্যাদি)</p>
 
+      {(form.mainImageUrl || imageUrlsList.length > 0 || videoUrlsList.length > 0) && (
+        <div style={{ marginBottom: 18, padding: 12, background: "var(--bg-soft, #f6f7f9)", borderRadius: 10, border: "1px solid var(--line)" }}>
+          <p className="muted" style={{ fontSize: "0.8rem", marginBottom: 10 }}>সব মিডিয়া প্রিভিউ — অর্ডার এলে প্রোডাক্ট চিনতে সাহায্য করবে</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {form.mainImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={form.mainImageUrl}
+                alt="মেইন ছবি"
+                title="মেইন ছবি"
+                style={{ width: 110, height: 110, objectFit: "cover", borderRadius: 8, border: "2px solid var(--brand, #2563eb)" }}
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+            )}
+            {imageUrlsList.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={url}
+                alt={`ছবি ${i + 2}`}
+                style={{ width: 110, height: 110, objectFit: "cover", borderRadius: 8, border: "1px solid var(--line)" }}
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+            ))}
+            {videoUrlsList.map((url, i) => {
+              const yt = getYoutubeEmbedUrl(url);
+              return yt ? (
+                <iframe
+                  key={`v${i}`}
+                  width="150"
+                  height="110"
+                  src={yt}
+                  title={`ভিডিও ${i + 1}`}
+                  style={{ borderRadius: 8, border: "1px solid var(--line)" }}
+                  allow="encrypted-media"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  key={`v${i}`}
+                  width="150"
+                  height="110"
+                  src={url}
+                  controls
+                  style={{ borderRadius: 8, border: "1px solid var(--line)", background: "#000" }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="field">
         <label htmlFor="mainImageUrl">মেইন ছবির URL</label>
         <input id="mainImageUrl" value={form.mainImageUrl} onChange={(e) => update("mainImageUrl", e.target.value)} placeholder="https://..." />
-        {form.mainImageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={form.mainImageUrl}
-            alt="প্রিভিউ"
-            style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, marginTop: 10, border: "1px solid var(--line)" }}
-            onError={(e) => { e.currentTarget.style.display = "none"; }}
-            onLoad={(e) => { e.currentTarget.style.display = "block"; }}
-          />
-        )}
       </div>
       <div className="field">
         <label htmlFor="imageUrlsText">আরও ছবির URL (প্রতি লাইনে একটা করে)</label>

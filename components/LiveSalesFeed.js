@@ -9,7 +9,7 @@ export default function LiveSalesFeed() {
 
   useEffect(() => {
     if (!db) return;
-    const q = query(collection(db, "salesFeed"), orderBy("createdAt", "desc"), limit(8));
+    const q = query(collection(db, "salesFeed"), orderBy("createdAt", "desc"), limit(2));
     const unsub = onSnapshot(q, (snap) => {
       const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setItems((prev) => {
