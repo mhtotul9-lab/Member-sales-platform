@@ -20,6 +20,7 @@ export default function Nav({ role, active }) {
           { href: "/admin/withdrawals", label: "উইথড্র", key: "withdrawals" },
           { href: "/admin/referrals", label: "রেফারেল", key: "referrals" },
           { href: "/admin/trainings", label: "ট্রেনিং", key: "trainings" },
+          { href: "/notices", label: "নোটিস", key: "notices" },
           { href: "/admin/audit-logs", label: "অডিট লগ", key: "audit-logs" },
           { href: "/admin/reports", label: "রিপোর্ট", key: "reports" },
           { href: "/admin/settings", label: "সেটিংস", key: "settings" },
@@ -32,6 +33,7 @@ export default function Nav({ role, active }) {
           { href: "/member/withdrawals", label: "উইথড্র", key: "withdrawals" },
           { href: "/member/referrals", label: "রেফারেল", key: "referrals" },
           { href: "/member/trainings", label: "ট্রেনিং", key: "trainings" },
+          { href: "/notices", label: "নোটিস", key: "notices" },
           { href: "/leaderboard", label: "লিডারবোর্ড", key: "leaderboard" },
         ];
 
