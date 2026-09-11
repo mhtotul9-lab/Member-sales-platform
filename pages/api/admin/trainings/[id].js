@@ -14,13 +14,30 @@ async function handler(req, res) {
   if (!snap.exists) return res.status(404).json({ error: "ট্রেনিং পাওয়া যায়নি।" });
 
   if (req.method === "GET") {
-    const completedSnap = await adminDb
-      .collection("trainingProgress")
-      .where("trainingId", "==", id)
-      .where("status", "==", "completed")
-      .count()
-      .get();
-    return res.status(200).json({ training: { id: snap.id, ...snap.data() }, completedCount: completedSnap.data().count });
+    const [progressSnap, membersSnap] = await Promise.all([
+      adminDb.collection("trainingProgress").where("trainingId", "==", id).where("status", "==", "completed").get(),
+      adminDb.collection("members").get(),
+    ]);
+    const completedMap = new Map(progressSnap.docs.map((d) => [d.data().memberId, d.data().completedAt]));
+    const members = membersSnap.docs
+      .map((d) => ({ uid: d.id, ...d.data() }))
+      .filter((m) => m.role !== "admin" && m.status === "active")
+      .map((m) => ({
+        uid: m.uid,
+        fullName: m.fullName,
+        memberId: m.memberId,
+        phone: m.phone,
+        completed: completedMap.has(m.uid),
+        completedAt: completedMap.get(m.uid) || null,
+      }))
+      .sort((a, b) => Number(a.completed) - Number(b.completed) || (a.fullName || "").localeCompare(b.fullName || ""));
+
+    return res.status(200).json({
+      training: { id: snap.id, ...snap.data() },
+      completedCount: progressSnap.size,
+      totalActiveMembers: members.length,
+      members,
+    });
   }
 
   if (req.method === "PATCH") {

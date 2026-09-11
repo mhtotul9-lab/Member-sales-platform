@@ -93,7 +93,10 @@ export default function AdminTrainings() {
         </div>
 
         <div className="card">
-          <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>সব ট্রেনিং</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h2 style={{ fontSize: "1.05rem" }}>সব ট্রেনিং</h2>
+            <a className="btn btn-outline btn-sm" href="/admin/trainings/progress">মেম্বার প্রগ্রেস দেখুন</a>
+          </div>
           {trainings === null && <Loading />}
           {trainings && trainings.length === 0 && <div className="empty-state">এখনো কোনো ট্রেনিং যোগ করা হয়নি।</div>}
           {trainings && trainings.map((t) => (

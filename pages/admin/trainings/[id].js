@@ -11,6 +11,7 @@ export default function AdminTrainingDetail() {
   const { id } = router.query;
   const [form, setForm] = useState(null);
   const [completedCount, setCompletedCount] = useState(null);
+  const [members, setMembers] = useState(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -31,6 +32,7 @@ export default function AdminTrainingDetail() {
         if (!res.ok) throw new Error(body.error || "লোড করা যায়নি।");
         setForm(body.training);
         setCompletedCount(body.completedCount);
+        setMembers(body.members || null);
       } catch (err) {
         setError(err.message);
       }
@@ -95,6 +97,27 @@ export default function AdminTrainingDetail() {
             </form>
           )}
         </div>
+
+        {members && (
+          <div className="card" style={{ marginTop: 20 }}>
+            <h2 style={{ fontSize: "1.05rem", marginBottom: 4 }}>মেম্বার সম্পন্ন করেছে কি না</h2>
+            <p className="muted" style={{ marginBottom: 16, fontSize: "0.85rem" }}>
+              {completedCount} / {members.length} জন অ্যাক্টিভ মেম্বার এই ট্রেনিং সম্পন্ন করেছে
+            </p>
+            {members.length === 0 && <div className="empty-state">কোনো অ্যাক্টিভ মেম্বার নেই।</div>}
+            {members.map((m) => (
+              <div className="list-row" key={m.uid}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{m.fullName} <span className="muted">· {m.memberId}</span></div>
+                  <div className="muted" style={{ fontSize: "0.85rem" }}>{m.phone}</div>
+                </div>
+                <span className={`stamp ${m.completed ? "stamp-active" : "stamp-rejected"}`}>
+                  {m.completed ? "সম্পন্ন করেছে" : "করেনি"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

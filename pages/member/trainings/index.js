@@ -11,6 +11,11 @@ const STATUS_LABEL = {
   completed: { text: "সম্পন্ন", cls: "stamp-active" },
 };
 
+function getYoutubeEmbedUrl(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 export default function MemberTrainings() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
@@ -74,15 +79,43 @@ export default function MemberTrainings() {
 
           {trainings && trainings.map((t) => {
             const st = STATUS_LABEL[t.progressStatus];
+            const yt = t.videoUrl ? getYoutubeEmbedUrl(t.videoUrl) : null;
             return (
               <div className="list-row" key={t.id} style={{ flexDirection: "column", alignItems: "stretch" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <div style={{ fontWeight: 600 }}>{t.order}. {t.title}</div>
+                  <div style={{ fontWeight: 600, fontSize: "1.05rem" }}>{t.order}. {t.title}</div>
                   <span className={`stamp ${st.cls}`}>{st.text}</span>
                 </div>
-                {t.content && <p className="muted" style={{ marginBottom: 8 }}>{t.content}</p>}
-                <div style={{ display: "flex", gap: 8 }}>
-                  {t.videoUrl && <a className="btn btn-outline btn-sm" href={t.videoUrl} target="_blank" rel="noreferrer">ভিডিও দেখুন</a>}
+
+                {t.content && (
+                  <p style={{ marginBottom: 14, whiteSpace: "pre-wrap", lineHeight: 1.75, fontSize: "0.96rem" }}>
+                    {t.content}
+                  </p>
+                )}
+
+                {t.videoUrl && (
+                  <div style={{ marginBottom: 14 }}>
+                    {yt ? (
+                      <iframe
+                        width="100%"
+                        style={{ aspectRatio: "16/9", maxWidth: 640, borderRadius: 10, border: "1px solid var(--line)" }}
+                        src={yt}
+                        title={t.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <video
+                        controls
+                        style={{ width: "100%", maxWidth: 640, borderRadius: 10, border: "1px solid var(--line)", background: "#000" }}
+                        src={t.videoUrl}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {t.videoUrl && <a className="btn btn-outline btn-sm" href={t.videoUrl} target="_blank" rel="noreferrer">ভিডিও লিংক (নতুন ট্যাবে)</a>}
                   {t.pdfUrl && <a className="btn btn-outline btn-sm" href={t.pdfUrl} target="_blank" rel="noreferrer">PDF দেখুন</a>}
                   {t.progressStatus !== "completed" && (
                     <button className="btn btn-teal btn-sm" disabled={acting === t.id} onClick={() => markComplete(t.id)}>
