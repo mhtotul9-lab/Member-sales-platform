@@ -18,11 +18,17 @@ const ACTIONS = [
   { status: "refunded", label: "রিফান্ড", cls: "btn-danger", needsReason: true },
 ];
 
+function getYoutubeEmbedUrl(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 export default function AdminOrderDetail() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
   const { id } = router.query;
   const [order, setOrder] = useState(null);
+  const [product, setProduct] = useState(null);
   const [error, setError] = useState("");
   const [acting, setActing] = useState(null);
   const [reasonPrompt, setReasonPrompt] = useState(null);
@@ -44,6 +50,15 @@ export default function AdminOrderDetail() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "লোড করা যায়নি।");
       setOrder(body.order);
+      if (body.order?.productId) {
+        try {
+          const pRes = await fetch(`/api/admin/products/${body.order.productId}`, { headers: { Authorization: `Bearer ${token}` } });
+          const pBody = await pRes.json();
+          if (pRes.ok) setProduct(pBody.product);
+        } catch {
+          // পণ্যের অতিরিক্ত ছবি না পেলেও অর্ডার দেখাতে সমস্যা নেই
+        }
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -118,6 +133,58 @@ export default function AdminOrderDetail() {
                   {order.riskFlags.map((f) => (
                     <span key={f} className="stamp stamp-pending" style={{ marginRight: 6 }}>⚠ {RISK_FLAG_LABELS[f] || f}</span>
                   ))}
+                </div>
+              )}
+
+              {(product?.mainImageUrl || product?.imageUrls?.length > 0 || product?.videoUrls?.length > 0) && (
+                <div style={{ marginTop: 16, padding: 12, background: "var(--bg-soft, #f6f7f9)", borderRadius: 10, border: "1px solid var(--line)" }}>
+                  <p className="muted" style={{ fontSize: "0.8rem", marginBottom: 10 }}>প্রোডাক্টের সব ছবি ও ভিডিও — সঠিক প্রোডাক্ট চিনে নিন</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    {product.mainImageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={product.mainImageUrl}
+                        alt={product.name}
+                        title="মেইন ছবি"
+                        style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "2px solid var(--brand, #2563eb)" }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                    )}
+                    {(product.imageUrls || []).map((url, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`ছবি ${i + 2}`}
+                        style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid var(--line)" }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                    ))}
+                    {(product.videoUrls || []).map((url, i) => {
+                      const yt = getYoutubeEmbedUrl(url);
+                      return yt ? (
+                        <iframe
+                          key={`v${i}`}
+                          width="140"
+                          height="100"
+                          src={yt}
+                          title={`ভিডিও ${i + 1}`}
+                          style={{ borderRadius: 8, border: "1px solid var(--line)" }}
+                          allow="encrypted-media"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          key={`v${i}`}
+                          width="140"
+                          height="100"
+                          src={url}
+                          controls
+                          style={{ borderRadius: 8, border: "1px solid var(--line)", background: "#000" }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
