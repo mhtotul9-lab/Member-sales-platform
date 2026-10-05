@@ -19,7 +19,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/partner"); // partner.js redirects based on status/role
+      router.replace("/"); // index.js redirects based on status/role
     } catch (err) {
       const code = err?.code || "";
       if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) {

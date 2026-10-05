@@ -52,9 +52,8 @@ async function handler(req, res) {
       const order = orderSnap.data();
       const oldStatus = order.status;
 
-      const isWeb = order.source === "website"; // ওয়েবসাইট অর্ডারে মেম্বার/কমিশন/প্রফিট-পুল নেই
-      const memberRef = isWeb ? null : adminDb.collection("members").doc(order.memberId);
-      const memberSnap = isWeb ? null : await tx.get(memberRef);
+      const memberRef = adminDb.collection("members").doc(order.memberId);
+      const memberSnap = await tx.get(memberRef);
 
       const wasValid = VALID_SALE_STATUSES.includes(oldStatus);
       const isValid = VALID_SALE_STATUSES.includes(status);
@@ -69,7 +68,7 @@ async function handler(req, res) {
 
       tx.update(orderRef, orderUpdate);
 
-      if (memberSnap && memberSnap.exists && wasValid !== isValid) {
+      if (memberSnap.exists && wasValid !== isValid) {
         const member = memberSnap.data();
         const sign = isValid ? 1 : -1;
         tx.update(memberRef, {
@@ -78,7 +77,7 @@ async function handler(req, res) {
         });
       }
 
-      return { oldStatus, memberId: order.memberId, orderId: order.orderId, isWeb };
+      return { oldStatus, memberId: order.memberId, orderId: order.orderId };
     });
   } catch (err) {
     return res.status(err.statusCode || 500).json({ error: err.message });
@@ -96,13 +95,11 @@ async function handler(req, res) {
     timestamp: now,
   });
 
-  if (!result.isWeb) {
-    await notifyUser(result.memberId, {
-      type: "order_status",
-      message: (STATUS_MESSAGE[status] || (() => `আপনার অর্ডার ${result.orderId} স্ট্যাটাস পরিবর্তন হয়েছে: ${status}`))({ orderId: result.orderId }),
-      link: "/member/orders",
-    });
-  }
+  await notifyUser(result.memberId, {
+    type: "order_status",
+    message: (STATUS_MESSAGE[status] || (() => `আপনার অর্ডার ${result.orderId} স্ট্যাটাস পরিবর্তন হয়েছে: ${status}`))({ orderId: result.orderId }),
+    link: "/member/orders",
+  });
 
   // Profit sharing runs after the transition is safely committed. It touches
   // a variable-size set of member documents (the eligible-active snapshot),
@@ -112,7 +109,7 @@ async function handler(req, res) {
   try {
     const wasValid = VALID_SALE_STATUSES.includes(result.oldStatus);
     const isValid = VALID_SALE_STATUSES.includes(status);
-    if (wasValid !== isValid && !result.isWeb) {
+    if (wasValid !== isValid) {
       const freshSnap = await orderRef.get();
       const freshOrder = { id: freshSnap.id, ...freshSnap.data() };
       if (!wasValid && isValid) {

@@ -22,7 +22,7 @@ export default function Pending() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/partner" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo height={30} /></a>
+        <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo height={30} /></a>
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>

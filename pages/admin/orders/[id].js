@@ -5,7 +5,6 @@ import Nav from "../../../components/Nav";
 import { ORDER_STATUS_LABELS, RISK_FLAG_LABELS } from "../../../lib/orderStatus";
 import Loading from "../../../components/Loading";
 import ErrorText from "../../../components/ErrorText";
-import OrderEditor from "../../../components/OrderEditor";
 
 const ACTIONS = [
   { status: "under_review", label: "রিভিউতে নিন", cls: "btn-outline" },
@@ -213,8 +212,6 @@ export default function AdminOrderDetail() {
               )}
               {order.notes && <p className="muted" style={{ marginTop: 14 }}>নোট: {order.notes}</p>}
             </div>
-
-            <OrderEditor key={order.updatedAt} order={order} user={user} onSaved={load} />
 
             <div className="card" style={{ marginBottom: 20 }}>
               <h2 style={{ fontSize: "1.05rem", marginBottom: 14 }}>অ্যাকশন</h2>

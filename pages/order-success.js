@@ -1,37 +1,50 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import StoreLayout from "../components/store/StoreLayout";
-import { getStoreSettings, publicSettings } from "../lib/storefront";
-import { taka } from "../components/store/ProductCard";
+import s from "../styles/store.module.css";
+import { getSettings } from "../lib/store/server";
+import { fmtPrice } from "../lib/store/shared";
+import { track } from "../lib/store/pixel";
 
-export async function getServerSideProps() {
-  return { props: { settings: publicSettings(await getStoreSettings()) } };
+export async function getServerSideProps({ res }) {
+  res.setHeader("Cache-Control", "no-store");
+  return { props: { settings: await getSettings() } };
 }
 
 export default function OrderSuccess({ settings }) {
-  const [info, setInfo] = useState(null);
+  const [o, setO] = useState(null);
+
   useEffect(() => {
     try {
-      const last = JSON.parse(sessionStorage.getItem("lastOrder") || "null");
-      const o = new URLSearchParams(location.search).get("o");
-      setInfo(last && last.orderId === o ? last : o ? { orderId: o } : null);
-    } catch {}
+      const data = JSON.parse(sessionStorage.getItem("jr_last_order") || "null");
+      if (!data) return;
+      setO(data);
+      const flag = `jr_purchased_${data.orderNo}`;
+      if (!sessionStorage.getItem(flag) && !data.duplicate) {
+        sessionStorage.setItem(flag, "1");
+        // Purchase ইভেন্ট — Pixel ও GTM dataLayer দুই জায়গাতেই যায়
+        track("Purchase", { content_ids: [data.productId], content_name: data.productName, content_type: "product", num_items: data.qty, value: data.total, currency: "BDT", transaction_id: data.orderNo, contents: [{ id: data.productId, quantity: data.qty, item_price: data.price }] }, data.eventId || undefined);
+      }
+    } catch (e) {}
   }, []);
-  const wa = settings.whatsapp ? String(settings.whatsapp).replace(/\D/g, "") : "";
 
+  const wa = settings.whatsapp ? `https://wa.me/${settings.whatsapp}` : "";
   return (
-    <StoreLayout settings={settings} title="অর্ডার সম্পন্ন">
-      <div className="st-wrap st-center">
-        <div className="st-ok" aria-hidden="true">✓</div>
-        <h1>ধন্যবাদ! আপনার অর্ডার পাওয়া গেছে</h1>
-        {info?.orderId && (
-          <p className="st-orderid">অর্ডার নম্বর: <b>{info.orderId}</b>{info.total ? <> · মোট {taka(info.total)} (ক্যাশ অন ডেলিভারি)</> : null}</p>
-        )}
-        <p>আমাদের প্রতিনিধি খুব শীঘ্রই আপনার নম্বরে ফোন করে অর্ডার কনফার্ম করবেন। অনুগ্রহ করে ফোন রিসিভ করবেন।</p>
-        <div className="st-actions">
-          <Link href="/track" className="st-btn">অর্ডার ট্র্যাক করুন</Link>
-          <Link href="/" className="st-btn st-btn-ghost">আরও প্রোডাক্ট দেখুন</Link>
-          {wa && <a className="st-btn st-btn-ghost" href={`https://wa.me/${wa}`}>হোয়াটসঅ্যাপে মেসেজ</a>}
+    <StoreLayout settings={settings} title={`অর্ডার সম্পন্ন — ${settings.storeName}`} hideFooter>
+      <div className={s.wrap}>
+        <div className={s.success}>
+          <div className={s.check}>✓</div>
+          <h1 style={{ margin: "0 0 6px", fontSize: "1.5rem" }}>আপনার অর্ডার সম্পন্ন হয়েছে!</h1>
+          {o ? (
+            <>
+              <div className={s.orderNo}>{o.orderNo}</div>
+              <p style={{ margin: "0 0 4px" }}>{o.name}, আমরা শীঘ্রই <b>{o.phone}</b> নাম্বারে ফোন করে অর্ডার কনফার্ম করব।</p>
+              <p style={{ margin: "0 0 18px", color: "#3B4A63" }}>{o.productName} — সর্বমোট <b>{fmtPrice(o.total)}</b> (ক্যাশ অন ডেলিভারি)</p>
+            </>
+          ) : (
+            <p style={{ margin: "10px 0 18px" }}>ধন্যবাদ! আমরা শীঘ্রই ফোন করে অর্ডার কনফার্ম করব।</p>
+          )}
+          <a href="/" className={s.heroBtn} style={{ background: "#12213B", color: "#fff" }}>আরও পণ্য দেখুন</a>
+          {wa && <p style={{ marginTop: 16, fontSize: "0.9rem" }}>কিছু জানতে চাইলে <a href={wa} target="_blank" rel="noreferrer">WhatsApp এ মেসেজ করুন</a></p>}
         </div>
       </div>
     </StoreLayout>

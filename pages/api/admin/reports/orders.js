@@ -15,11 +15,6 @@ const COLUMNS = [
   { key: "customerPhone", label: "Phone" },
   { key: "marketingSource", label: "Source" },
   { key: "status", label: "Status" },
-  { key: "source", label: "Channel" },
-  { key: "deliveryCharge", label: "Delivery Charge" },
-  { key: "totalPayable", label: "Total COD" },
-  { key: "courierName", label: "Courier" },
-  { key: "trackingId", label: "Tracking ID" },
 ];
 
 async function handler(req, res) {
