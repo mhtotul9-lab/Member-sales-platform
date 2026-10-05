@@ -154,6 +154,7 @@ export default function AdminProducts() {
                       {p.status === "inactive" ? "অ্যাক্টিভ করুন" : "ইনঅ্যাক্টিভ করুন"}
                     </button>
                   )}
+                  <a className="btn btn-outline btn-sm" href={`/product/${p.id}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>স্টোর পেজ ↗</a>
                   <a className="btn btn-outline btn-sm" href={`/admin/products/${p.id}`} onClick={(e) => e.stopPropagation()}>এডিট</a>
                   <button className="btn btn-danger btn-sm" disabled={actingOn === p.id} onClick={(e) => deleteProduct(p, e)}>ডিলিট</button>
                 </div>

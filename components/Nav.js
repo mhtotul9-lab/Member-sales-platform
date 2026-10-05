@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import { auth } from "../lib/firebase";
 import NotificationBell from "./NotificationBell";
 import Logo from "./Logo";
+import { RESELLER } from "../lib/features";
+const RESELLER_KEYS = ["members", "profit", "withdrawals", "referrals", "trainings", "notices", "settings"];
 
 export default function Nav({ role, active }) {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function Nav({ role, active }) {
           { href: "/admin/members", label: "মেম্বার", key: "members" },
           { href: "/admin/products", label: "প্রোডাক্ট", key: "products" },
           { href: "/admin/orders", label: "অর্ডার", key: "orders" },
+          { href: "/admin/store", label: "স্টোর", key: "store" },
           { href: "/admin/profit", label: "প্রফিট", key: "profit" },
           { href: "/admin/withdrawals", label: "উইথড্র", key: "withdrawals" },
           { href: "/admin/referrals", label: "রেফারেল", key: "referrals" },
@@ -37,6 +40,9 @@ export default function Nav({ role, active }) {
           { href: "/leaderboard", label: "লিডারবোর্ড", key: "leaderboard" },
         ];
 
+  const visible = role === "admin" && !RESELLER ? links.filter((l) => !RESELLER_KEYS.includes(l.key)) : links;
+  const home = role === "admin" ? (RESELLER ? "/admin/dashboard" : "/admin/orders") : "/member/dashboard";
+
   function linkClass(key) {
     return active === key ? "nav-link nav-link-active" : "nav-link";
   }
@@ -44,12 +50,12 @@ export default function Nav({ role, active }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <a className="brand" href={role === "admin" ? "/admin/dashboard" : "/member/dashboard"}>
+        <a className="brand" href={home}>
           <Logo height={34} />
           {role === "admin" && <span className="brand-role">অ্যাডমিন</span>}
         </a>
         <nav className="topbar-links">
-          {links.map((l) => <a key={l.key} href={l.href} className={linkClass(l.key)}>{l.label}</a>)}
+          {visible.map((l) => <a key={l.key} href={l.href} className={linkClass(l.key)}>{l.label}</a>)}
         </nav>
       </div>
 
@@ -70,7 +76,7 @@ export default function Nav({ role, active }) {
       </button>
 
       <nav className={`mobile-menu${menuOpen ? " open" : ""}`}>
-        {links.map((l) => (
+        {visible.map((l) => (
           <a key={l.key} href={l.href} className={linkClass(l.key)} onClick={() => setMenuOpen(false)}>
             {l.label}
           </a>

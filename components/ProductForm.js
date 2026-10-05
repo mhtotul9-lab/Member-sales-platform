@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RESELLER } from "../lib/features";
 
 const STATUS_OPTIONS = [
   { value: "active", label: "অ্যাক্টিভ" },
@@ -13,9 +14,11 @@ const emptyForm = {
   category: "",
   sellingPrice: "",
   costPrice: "",
-  memberCommission: "",
+  memberCommission: "0",
   referralCommissionAmount: "",
   status: "active",
+  comparePrice: "",
+  showOnStore: true,
   shortDescription: "",
   fullDescription: "",
   mainImageUrl: "",
@@ -36,6 +39,8 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           costPrice: String(initial.costPrice ?? ""),
           memberCommission: String(initial.memberCommission ?? ""),
           referralCommissionAmount: String(initial.referralCommissionAmount ?? ""),
+          comparePrice: initial.comparePrice ? String(initial.comparePrice) : "",
+          showOnStore: initial.showOnStore !== false,
           imageUrlsText: (initial.imageUrls || []).join("\n"),
           videoUrlsText: (initial.videoUrls || []).join("\n"),
         }
@@ -57,6 +62,8 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
       memberCommission: form.memberCommission,
       referralCommissionAmount: form.referralCommissionAmount,
       status: form.status,
+      comparePrice: form.comparePrice,
+      showOnStore: form.showOnStore,
       shortDescription: form.shortDescription,
       fullDescription: form.fullDescription,
       mainImageUrl: form.mainImageUrl,
@@ -102,9 +109,21 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
           <input id="sellingPrice" type="number" step="0.01" required value={form.sellingPrice} onChange={(e) => update("sellingPrice", e.target.value)} />
         </div>
         <div className="field">
+          <label htmlFor="comparePrice">আগের দাম / MRP (৳) — স্টোরে কাটা দাম ও ছাড় %</label>
+          <input id="comparePrice" type="number" step="0.01" min="0" value={form.comparePrice} onChange={(e) => update("comparePrice", e.target.value)} placeholder="ঐচ্ছিক" />
+        </div>
+        <div className="field">
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input type="checkbox" style={{ width: "auto" }} checked={form.showOnStore} onChange={(e) => update("showOnStore", e.target.checked)} />
+            পাবলিক স্টোরে দেখান (সবাই অর্ডার করতে পারবে)
+          </label>
+        </div>
+        <div className="field">
           <label htmlFor="costPrice">Cost Price (৳)</label>
           <input id="costPrice" type="number" step="0.01" required value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} />
         </div>
+        {RESELLER && (
+          <>
         <div className="field">
           <label htmlFor="memberCommission">মেম্বার কমিশন (৳ প্রতি ইউনিট)</label>
           <input id="memberCommission" type="number" step="0.01" min="0" required value={form.memberCommission} onChange={(e) => update("memberCommission", e.target.value)} />
@@ -119,6 +138,8 @@ export default function ProductForm({ initial, submitting, error, onSubmit, subm
             উপরের &quot;মেম্বার কমিশন&quot; থেকে আলাদা — এটা যায় সেলারকে যে রেফার করেছিল তার কাছে, শুধু সেলারের প্রথম সেলে, একবারই। খালি/০ রাখলে এই প্রোডাক্টে কোনো রেফারেল বোনাস দেওয়া হবে না।
           </p>
         </div>
+          </>
+        )}
       </div>
 
       <div className="field">

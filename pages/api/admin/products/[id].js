@@ -35,6 +35,9 @@ async function handler(req, res) {
     if (Array.isArray(body.imageUrls)) update.imageUrls = body.imageUrls.filter(Boolean);
     if (Array.isArray(body.videoUrls)) update.videoUrls = body.videoUrls.filter(Boolean);
 
+    if (body.comparePrice !== undefined) update.comparePrice = Number(body.comparePrice) > 0 ? Number(body.comparePrice) : 0;
+    if (body.showOnStore !== undefined) update.showOnStore = !!body.showOnStore;
+
     if (body.status !== undefined) {
       if (!STATUSES.includes(body.status)) return res.status(400).json({ error: "অবৈধ status।" });
       update.status = body.status;

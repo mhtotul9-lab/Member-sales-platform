@@ -26,6 +26,7 @@ async function handler(req, res) {
   const totals = {};
   for (const doc of snap.docs) {
     const o = doc.data();
+    if (o.source === "website" || !o.memberId) continue;
     if (!totals[o.memberId]) totals[o.memberId] = { totalSales: 0, totalOrders: 0 };
     totals[o.memberId].totalSales += o.orderAmount;
     totals[o.memberId].totalOrders += 1;

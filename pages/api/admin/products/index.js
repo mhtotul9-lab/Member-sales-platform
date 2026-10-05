@@ -50,6 +50,8 @@ async function handler(req, res) {
       profit: Number((sellingPrice - costPrice).toFixed(2)),
       memberCommission,
       referralCommissionAmount,
+      comparePrice: Number(body.comparePrice) > 0 ? Number(body.comparePrice) : 0,
+      showOnStore: body.showOnStore !== false,
       status: STATUSES.includes(body.status) ? body.status : "active",
       mainImageUrl: body.mainImageUrl || "",
       imageUrls: Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [],
