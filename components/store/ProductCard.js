@@ -1,28 +1,27 @@
-import Link from "next/link";
-
-export const taka = (n) => "৳" + Number(n).toLocaleString("bn-BD");
-export const discountPct = (p) => (p.comparePrice > p.sellingPrice ? Math.round((1 - p.sellingPrice / p.comparePrice) * 100) : 0);
+import s from "../../styles/store.module.css";
+import { fmtPrice, toBnDigits, discountPercent } from "../../lib/store/shared";
 
 export default function ProductCard({ p }) {
-  const off = discountPct(p);
+  const off = discountPercent(p.price, p.comparePrice);
   return (
-    <Link href={`/product/${p.id}`} className="st-card">
-      <div className="st-card-img">
-        {p.mainImageUrl ? (
+    <a className={s.card} href={`/p/${p.slug}`}>
+      <div className={s.imgBox}>
+        {p.images[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.mainImageUrl} alt={p.name} loading="lazy" />
-        ) : <span>ছবি নেই</span>}
-        {off > 0 && !p.outOfStock && <em className="st-badge">{off.toLocaleString("bn-BD")}% ছাড়</em>}
-        {p.outOfStock && <em className="st-badge st-badge-out">স্টক শেষ</em>}
+          <img src={p.images[0]} alt={p.name} loading="lazy" />
+        ) : null}
+        {off > 0 && !p.soldOut && <span className={s.badge}>{toBnDigits(off)}% ছাড়</span>}
+        {p.soldOut && <div className={s.soldOut}>স্টক আউট</div>}
       </div>
-      <div className="st-card-body">
-        <h3>{p.name}</h3>
-        <div className="st-price">
-          <b>{taka(p.sellingPrice)}</b>
-          {p.comparePrice > p.sellingPrice && <s>{taka(p.comparePrice)}</s>}
+      <div className={s.cardBody}>
+        {p.category && <span className={s.cardCat}>{p.category}</span>}
+        <div className={s.cardName}>{p.name}</div>
+        <div className={s.priceRow}>
+          <span className={s.price}>{fmtPrice(p.price)}</span>
+          {p.comparePrice > p.price && <span className={s.old}>{fmtPrice(p.comparePrice)}</span>}
         </div>
-        <span className="st-btn st-btn-block">{p.outOfStock ? "বিস্তারিত দেখুন" : "অর্ডার করুন"}</span>
+        <div className={s.orderBtn}>{p.soldOut ? "বিস্তারিত দেখুন" : "অর্ডার করুন"}</div>
       </div>
-    </Link>
+    </a>
   );
 }

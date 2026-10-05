@@ -1,73 +1,76 @@
 import Head from "next/head";
-import Link from "next/link";
 import Logo from "../Logo";
-import { track } from "../../lib/pixel";
-import { RESELLER } from "../../lib/features";
+import s from "../../styles/store.module.css";
+import { PIXEL_ID, pixelBaseCode, GTM_ID, gtmCode } from "../../lib/store/pixel";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "";
-
-export default function StoreLayout({ settings, title, description, image, children }) {
-  const s = settings || {};
-  const pageTitle = title ? `${title} | ${s.storeName || "জলরাশি"}` : `${s.storeName || "জলরাশি"} — ${s.tagline || ""}`;
-  const wa = s.whatsapp ? String(s.whatsapp).replace(/\D/g, "") : "";
-  const tel = s.hotline ? String(s.hotline).replace(/[^\d+]/g, "") : "";
-
+// স্টোরের সব পেজের কাঠামো + Pixel/GTM কোড।
+export default function StoreLayout({ settings, title, description, image, children, search, onSearch, hideFooter }) {
+  const waLink = settings.whatsapp ? `https://wa.me/${settings.whatsapp}` : "";
+  const telLink = settings.phone ? `tel:${settings.phone.replace(/\s/g, "")}` : "";
   return (
-    <div className="st">
+    <div className={s.page}>
       <Head>
-        <title>{pageTitle}</title>
+        <title>{title || `${settings.storeName} — অনলাইন শপ`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {description && <meta name="description" content={description} />}
-        <meta property="og:title" content={pageTitle} />
-        {description && <meta property="og:description" content={description} />}
-        {image && <meta property="og:image" content={image} />}
+        <meta name="description" content={description || settings.tagline} />
+        <meta property="og:title" content={title || settings.storeName} />
+        <meta property="og:description" content={description || settings.tagline} />
         <meta property="og:type" content="website" />
-        {SITE && <meta property="og:site_name" content={s.storeName} />}
+        {image && <meta property="og:image" content={image} />}
+        <script dangerouslySetInnerHTML={{ __html: "window.dataLayer=window.dataLayer||[];" }} />
+        {GTM_ID && <script dangerouslySetInnerHTML={{ __html: gtmCode }} />}
+        <script dangerouslySetInnerHTML={{ __html: pixelBaseCode }} />
       </Head>
+      <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img height="1" width="1" style={{ display: "none" }} alt="" src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`} />
+      </noscript>
 
-      {s.announcement && <div className="st-announce">{s.announcement}</div>}
+      {settings.announcement && <div className={s.announce}>{settings.announcement}</div>}
 
-      <header className="st-header">
-        <Link href="/" className="st-logo" aria-label="হোম"><Logo height={34} /></Link>
-        <nav className="st-nav">
-          <Link href="/">হোম</Link>
-          <Link href="/track">অর্ডার ট্র্যাক</Link>
-          {tel && <a href={`tel:${tel}`} className="st-call" onClick={() => track("Contact", { content_name: "header_call" })}>📞 {s.hotline}</a>}
-        </nav>
+      <header className={s.header}>
+        <div className={`${s.wrap} ${s.headerRow}`}>
+          <a href="/" aria-label={settings.storeName}><Logo height={38} /></a>
+          {onSearch ? (
+            <div className={s.search}>
+              <svg className={s.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+              <input value={search} onChange={(e) => onSearch(e.target.value)} placeholder="পণ্য খুঁজুন..." aria-label="পণ্য খুঁজুন" />
+            </div>
+          ) : <div style={{ flex: 1 }} />}
+          {telLink && <a className={s.callBtn} href={telLink}>📞 <span>{settings.phone}</span></a>}
+        </div>
       </header>
 
-      <main>{children}</main>
+      {children}
 
-      <footer className="st-footer">
-        <div className="st-wrap st-footer-grid">
-          <div>
-            <b>{s.storeName}</b>
-            <p>{s.tagline}</p>
-            {s.address && <p>{s.address}</p>}
+      {!hideFooter && (
+        <footer className={s.footer}>
+          <div className={`${s.wrap} ${s.footerGrid}`}>
+            <div>
+              <h4>{settings.storeName}</h4>
+              <p style={{ margin: 0, fontSize: "0.93rem" }}>{settings.tagline}</p>
+            </div>
+            <div>
+              <h4>যোগাযোগ</h4>
+              {settings.phone && <a href={telLink}>📞 {settings.phone}</a>}
+              {waLink && <a href={waLink} target="_blank" rel="noreferrer">💬 WhatsApp</a>}
+              {settings.address && <span style={{ fontSize: "0.93rem" }}>📍 {settings.address}</span>}
+            </div>
+            <div>
+              <h4>ডেলিভারি</h4>
+              <span style={{ fontSize: "0.93rem" }}>{settings.deliveryNote}</span>
+              {settings.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer" style={{ marginTop: 8 }}>👍 Facebook পেজ</a>}
+            </div>
           </div>
-          <div>
-            <b>যোগাযোগ</b>
-            {s.hotline && <p>হটলাইন: <a href={`tel:${tel}`}>{s.hotline}</a></p>}
-            {wa && <p>হোয়াটসঅ্যাপ: <a href={`https://wa.me/${wa}`}>{s.whatsapp}</a></p>}
-            {s.facebookUrl && <p><a href={s.facebookUrl} target="_blank" rel="noreferrer">ফেসবুক পেজ</a></p>}
-          </div>
-          <div>
-            <b>লিংক</b>
-            <p><Link href="/track">অর্ডার ট্র্যাক করুন</Link></p>
-            {RESELLER && <p><Link href="/partner">রিসেলার / পার্টনার হোন</Link></p>}
-            {RESELLER && <p><Link href="/login">পার্টনার লগইন</Link></p>}
-          </div>
+          <div className={`${s.wrap} ${s.copy}`}>© {new Date().getFullYear()} {settings.storeName} — সর্বস্বত্ব সংরক্ষিত</div>
+        </footer>
+      )}
+
+      {(waLink || telLink) && (
+        <div className={s.float}>
+          {waLink && <a className={s.floatBtn} style={{ background: "#25D366" }} href={waLink} target="_blank" rel="noreferrer" aria-label="WhatsApp">💬</a>}
+          {telLink && <a className={s.floatBtn} style={{ background: "#12213B" }} href={telLink} aria-label="ফোন করুন">📞</a>}
         </div>
-        <div className="st-copy">© {new Date().getFullYear()} {s.storeName} — সব অধিকার সংরক্ষিত</div>
-      </footer>
-
-      {wa && (
-        <a
-          className="st-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" aria-label="হোয়াটসঅ্যাপে মেসেজ করুন"
-          onClick={() => track("Contact", { content_name: "whatsapp" })}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12Z"/></svg>
-        </a>
       )}
     </div>
   );
