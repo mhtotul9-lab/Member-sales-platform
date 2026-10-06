@@ -294,3 +294,21 @@
   .heroStats b { font-size: 1.15rem; }
   .callBtn { padding: 9px 12px; }
 }
+
+/* ===== হেডার: লোগো | সার্চ (মাঝে, গোল) | মেনু — এক লাইনে ===== */
+.headerRow > a { flex: none; }
+@media (max-width: 1000px) {
+  .headerRow { flex-wrap: nowrap; gap: 12px; }
+  .headerRight { flex: 1; min-width: 0; margin-left: 0; display: flex; align-items: center; gap: 10px; }
+  .search { flex: 1; min-width: 0; width: auto; max-width: 440px; margin: 0 auto; }
+  .burger { margin-left: auto; flex: none; }
+}
+@media (max-width: 640px) {
+  .headerRow { flex-wrap: nowrap; row-gap: 0; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
+  .headerRight { display: flex; gap: 8px; }
+  .callBtn { display: none; }
+  .search { order: 0; flex: 1; flex-basis: auto; width: auto; margin: 0; }
+  .search input { height: 40px; padding: 8px 12px 8px 34px; font-size: .88rem; }
+  .searchIcon { left: 11px; }
+  .burger { order: 0; width: 40px; height: 40px; border-radius: 50%; }
+}

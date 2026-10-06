@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Head from "next/head";
 import Logo from "../Logo";
+import { catSlug } from "../../lib/store/shared";
 import s from "../../styles/store.module.css";
 import { PIXEL_ID, pixelBaseCode, GTM_ID, gtmCode, TRACKING_MODE } from "../../lib/store/pixel";
 
@@ -71,6 +72,8 @@ export default function StoreLayout({ settings, title, description, image, child
         <div className={s.drawerPanel} onClick={(e) => e.stopPropagation()}>
           <button className={s.burger} style={{ alignSelf: "flex-end", marginBottom: 8 }} onClick={() => setMenu(false)} aria-label="বন্ধ করুন">✕</button>
           {NAV.map((n) => <a key={n.label} href={n.href} onClick={() => setMenu(false)}>{n.label}</a>)}
+          {categories.slice(0, 8).map((c) => <a key={c} href={`/category/${encodeURI(catSlug(c))}`} style={{ paddingLeft: 20, fontSize: ".92rem" }}>› {c}</a>)}
+          {telLink && <a href={telLink}>📞 কল করুন</a>}
           {waLink && <a href={waLink} target="_blank" rel="noreferrer">💬 WhatsApp</a>}
         </div>
       </div>
@@ -99,7 +102,7 @@ export default function StoreLayout({ settings, title, description, image, child
             </div>
             <div>
               <h4>ক্যাটাগরি</h4>
-              {categories.slice(0, 6).map((c) => <a key={c} href={`/?cat=${encodeURIComponent(c)}#products`}>{c}</a>)}
+              {categories.slice(0, 6).map((c) => <a key={c} href={`/category/${encodeURI(catSlug(c))}`}>{c}</a>)}
               {categories.length === 0 && <a href="/#products">সব কালেকশন</a>}
             </div>
             <div>
