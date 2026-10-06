@@ -50,8 +50,8 @@ export function AuthProvider({ children }) {
       setDoc(memberRef, { lastLoginAt: nowIso(), lastActiveAt: nowIso() }, { merge: true }).catch(() => {});
     }
 
-    const beat = () => setDoc(memberRef, { lastActiveAt: nowIso() }, { merge: true }).catch(() => {});
-    const interval = setInterval(beat, HEARTBEAT_MS);
+    const beat = () => document.visibilityState === "visible" && setDoc(memberRef, { lastActiveAt: nowIso() }, { merge: true }).catch(() => {});
+    const interval = setInterval(beat, HEARTBEAT_MS); // ট্যাব লুকানো থাকলে beat কিছু লেখে না
     const onVisible = () => { if (document.visibilityState === "visible") beat(); };
     document.addEventListener("visibilitychange", onVisible);
 
