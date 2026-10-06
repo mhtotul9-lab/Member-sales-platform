@@ -22,7 +22,11 @@ export default function OrderSuccess({ settings }) {
       if (!sessionStorage.getItem(flag) && !data.duplicate) {
         sessionStorage.setItem(flag, "1");
         // Purchase ইভেন্ট — Pixel ও GTM dataLayer দুই জায়গাতেই যায়
-        track("Purchase", { content_ids: [data.productId], content_name: data.productName, content_type: "product", num_items: data.qty, value: data.total, currency: "BDT", transaction_id: data.orderNo, contents: [{ id: data.productId, quantity: data.qty, item_price: data.price }] }, data.eventId || undefined);
+        track("Purchase", { content_ids: [data.productId], content_name: data.productName, content_type: "product", num_items: data.qty, value: data.total, currency: "BDT", transaction_id: data.orderNo, contents: [{ id: data.productId, quantity: data.qty, item_price: data.price }] }, data.eventId || undefined, {
+          // GTM/সার্ভার ট্যাগ Advanced Matching ও Enhanced Conversions এ ব্যবহার করতে পারবে
+          user_data: { phone_number: "+88" + data.phone, address: { first_name: String(data.name || "").split(" ")[0], last_name: String(data.name || "").split(" ").slice(1).join(" "), country: "BD" } },
+          order_id: data.orderNo,
+        });
       }
     } catch (e) {}
   }, []);
