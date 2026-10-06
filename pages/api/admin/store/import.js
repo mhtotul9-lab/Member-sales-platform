@@ -25,6 +25,7 @@ async function handler(req, res) {
     if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: "কোনো প্রোডাক্ট বাছাই করা হয়নি।" });
     const store = await adminDb.collection("store_products").get();
     const imported = new Set(store.docs.map((d) => d.data().sourceProductId).filter(Boolean));
+    const topSort = store.docs.reduce((m, d) => Math.max(m, Number(d.data().sortOrder) || 0), 0);
     let count = 0;
     for (const id of ids.slice(0, 100)) {
       if (imported.has(id)) continue;
@@ -43,7 +44,7 @@ async function handler(req, res) {
         stock: null,
         status: activate ? "active" : "draft",
         featured: false,
-        sortOrder: 0,
+        sortOrder: topSort + ids.length - count,
         images,
         sizes: [],
         colors: [],

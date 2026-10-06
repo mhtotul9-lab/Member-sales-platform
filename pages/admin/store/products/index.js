@@ -3,7 +3,7 @@ import Nav from "../../../../components/Nav";
 import Loading from "../../../../components/Loading";
 import StoreAdminTabs from "../../../../components/store/StoreAdminTabs";
 import { useStoreAdmin } from "../../../../lib/store/useStoreAdmin";
-import { fmtPrice } from "../../../../lib/store/shared";
+import { fmtPrice, catSlug, STORE_URL } from "../../../../lib/store/shared";
 
 const STATUS = { active: ["চালু", "stamp-active"], out_of_stock: ["স্টক আউট", "stamp-rejected"], draft: ["ড্রাফট", "stamp-pending"], archived: ["আর্কাইভড", "stamp-pending"] };
 
@@ -22,13 +22,33 @@ export default function StoreProducts() {
   const load = useCallback(() => api("/api/admin/store/products").then((d) => setProducts(d.products)).catch((e) => setError(e.message)), [api]);
   useEffect(() => { if (ready) load(); }, [ready, load]);
 
-  const list = useMemo(() => (products || []).filter((p) => (!statusFilter || p.status === statusFilter) && (!q.trim() || `${p.name} ${p.category}`.toLowerCase().includes(q.trim().toLowerCase()))), [products, q, statusFilter]);
+  // সাইটে যে ক্রমে দেখায় অ্যাডমিনেও সেই ক্রম: sortOrder বড় আগে, সমান হলে নতুন আগে
+  const sorted = useMemo(() => [...(products || [])].sort((a, b) => (Number(b.sortOrder) || 0) - (Number(a.sortOrder) || 0) || String(b.createdAt || "").localeCompare(String(a.createdAt || ""))), [products]);
+  const filtering = !!q.trim() || !!statusFilter;
+  const categories = useMemo(() => [...new Set((products || []).filter((p) => p.status === "active" || p.status === "out_of_stock").map((p) => p.category).filter(Boolean))], [products]);
+
+  const list = useMemo(() => sorted.filter((p) => (!statusFilter || p.status === statusFilter) && (!q.trim() || `${p.name} ${p.category}`.toLowerCase().includes(q.trim().toLowerCase()))), [sorted, q, statusFilter]);
   const ids = Object.keys(sel).filter((k) => sel[k]);
 
   async function act(fn, ok) {
     setBusy(true); setError(""); setMsg("");
     try { await fn(); setMsg(ok || "হয়েছে ✓"); await load(); } catch (e) { setError(e.message); }
     setBusy(false);
+  }
+
+  // কাকে কোথায় নেওয়া হবে: up / down / top / bottom
+  function move(id, where) {
+    const ids2 = sorted.map((p) => p.id);
+    const i = ids2.indexOf(id);
+    if (i < 0) return;
+    ids2.splice(i, 1);
+    const to = where === "top" ? 0 : where === "bottom" ? ids2.length : where === "up" ? Math.max(0, i - 1) : Math.min(ids2.length, i + 1);
+    ids2.splice(to, 0, id);
+    act(() => api("/api/admin/store/products", { method: "PATCH", body: { action: "reorder", orderedIds: ids2 } }), "ক্রম বদলেছে ✓");
+  }
+
+  function copyLink(url) {
+    navigator.clipboard?.writeText(url).then(() => { setMsg("লিংক কপি হয়েছে ✓"); setTimeout(() => setMsg(""), 2000); }).catch(() => window.prompt("লিংকটি কপি করুন:", url));
   }
 
   function openEdit(p) {
@@ -52,6 +72,23 @@ export default function StoreProducts() {
             </div>
           </div>
 
+          {categories.length > 0 && (
+            <details style={{ marginBottom: 14, background: "var(--paper)", borderRadius: 10, padding: "10px 14px" }}>
+              <summary style={{ cursor: "pointer", fontWeight: 600 }}>🔗 ক্যাটাগরির আলাদা লিংক (বিজ্ঞাপনে দেওয়ার জন্য)</summary>
+              {categories.map((c) => {
+                const url = `${STORE_URL}/category/${encodeURI(catSlug(c))}`;
+                return (
+                  <div key={c} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
+                    <b style={{ minWidth: 90 }}>{c}</b>
+                    <code style={{ flex: 1, fontSize: ".8rem", wordBreak: "break-all" }}>{url}</code>
+                    <button className="btn btn-outline btn-sm" onClick={() => copyLink(url)}>কপি</button>
+                    <a className="btn btn-outline btn-sm" href={url} target="_blank" rel="noreferrer">খুলুন ↗</a>
+                  </div>
+                );
+              })}
+            </details>
+          )}
+
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
             <input style={{ flex: 1, minWidth: 180 }} value={q} onChange={(e) => setQ(e.target.value)} placeholder="নাম বা ক্যাটাগরি দিয়ে খুঁজুন" />
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -71,15 +108,29 @@ export default function StoreProducts() {
           )}
 
           {msg && <p style={{ color: "var(--teal)", fontWeight: 600 }}>{msg}</p>}
+          {!filtering && list.length > 1 && <p className="muted" style={{ margin: "0 0 8px" }}>সাইটে প্রোডাক্ট ঠিক এই ক্রমেই দেখায়। ⤒ সবার উপরে, ▲ এক ধাপ উপরে, ▼ এক ধাপ নিচে, ⤓ সবার নিচে।</p>}
+          {filtering && <p className="muted" style={{ margin: "0 0 8px" }}>ক্রম বদলাতে আগে সার্চ/ফিল্টার সরিয়ে ফেলুন।</p>}
           {error && <p className="error-text">{error}</p>}
           {!products && !error && <Loading />}
           {products && list.length === 0 && <div className="empty-state">{products.length === 0 ? "এখনো কোনো প্রোডাক্ট নেই। “নতুন প্রোডাক্ট” বা “ইম্পোর্ট” চেপে শুরু করুন।" : "কিছু পাওয়া যায়নি।"}</div>}
           {list.length > 0 && <label style={{ display: "flex", gap: 8, alignItems: "center", fontSize: ".85rem", margin: "0 0 6px" }}><input type="checkbox" checked={list.every((p) => sel[p.id])} onChange={(e) => setSel(e.target.checked ? Object.fromEntries(list.map((p) => [p.id, true])) : {})} /> সব বাছুন</label>}
 
-          {list.map((p) => (
+          {list.map((p, idx) => (
             <div key={p.id} style={{ borderBottom: "1px solid var(--line)", padding: "10px 0" }}>
               <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 <input type="checkbox" checked={!!sel[p.id]} onChange={(e) => setSel({ ...sel, [p.id]: e.target.checked })} />
+                {!filtering && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <div style={{ display: "flex", gap: 3 }}>
+                      <button className="btn btn-outline btn-sm" style={{ padding: "2px 8px" }} title="সবার উপরে" disabled={busy || idx === 0} onClick={() => move(p.id, "top")}>⤒</button>
+                      <button className="btn btn-outline btn-sm" style={{ padding: "2px 8px" }} title="এক ধাপ উপরে" disabled={busy || idx === 0} onClick={() => move(p.id, "up")}>▲</button>
+                    </div>
+                    <div style={{ display: "flex", gap: 3 }}>
+                      <button className="btn btn-outline btn-sm" style={{ padding: "2px 8px" }} title="এক ধাপ নিচে" disabled={busy || idx === list.length - 1} onClick={() => move(p.id, "down")}>▼</button>
+                      <button className="btn btn-outline btn-sm" style={{ padding: "2px 8px" }} title="সবার নিচে" disabled={busy || idx === list.length - 1} onClick={() => move(p.id, "bottom")}>⤓</button>
+                    </div>
+                  </div>
+                )}
                 <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", background: "#eef1ef", flex: "none" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {p.images?.[0] && <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}

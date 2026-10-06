@@ -3,7 +3,7 @@ import StoreLayout from "../../components/store/StoreLayout";
 import ProductCard from "../../components/store/ProductCard";
 import s from "../../styles/store.module.css";
 import { getSettings, getPublicProductBySlug, listPublicProducts } from "../../lib/store/server";
-import { fmtPrice, toBnDigits, discountPercent, calcDelivery, normalizePhone } from "../../lib/store/shared";
+import { fmtPrice, toBnDigits, discountPercent, calcDelivery, normalizePhone, catSlug } from "../../lib/store/shared";
 import { track, newEventId, getFbCookies } from "../../lib/store/pixel";
 
 export async function getServerSideProps({ params, res }) {
@@ -93,7 +93,7 @@ export default function ProductPage({ settings, product: p, related, categories 
   return (
     <StoreLayout settings={settings} title={`${p.name} — ${settings.storeName}`} description={desc} image={p.images[0]} categories={categories}>
       <div className={s.wrap}>
-        <div className={s.crumbs}><a href="/">হোম</a> › {p.category && <><a href={`/?cat=${encodeURIComponent(p.category)}#products`}>{p.category}</a> › </>}{p.name}</div>
+        <div className={s.crumbs}><a href="/">হোম</a> › {p.category && <><a href={`/category/${encodeURI(catSlug(p.category))}`}>{p.category}</a> › </>}{p.name}</div>
         <div className={s.pdp}>
           <div className={s.gallery}>
             <div className={s.mainImg} onClick={() => p.images[active] && setZoom(true)}>

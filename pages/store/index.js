@@ -5,7 +5,7 @@ import ProductCard from "../../components/store/ProductCard";
 import s from "../../styles/store.module.css";
 import { getSettings, listPublicProducts } from "../../lib/store/server";
 import { track } from "../../lib/store/pixel";
-import { toBnDigits } from "../../lib/store/shared";
+import { toBnDigits, catSlug } from "../../lib/store/shared";
 
 export async function getServerSideProps({ res }) {
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=300");
@@ -98,11 +98,11 @@ export default function StoreHome({ settings, products, loadError }) {
             <div className={s.sectionHead}><span className="kicker" style={{ color: "#B98B3C", fontWeight: 700, fontSize: ".82rem" }}>ক্যাটাগরি</span><h2>পছন্দের ধরন বাছুন</h2><div className={s.divider} /></div>
             <div className={s.cats}>
               {catTiles.map((c) => (
-                <button key={c.name} className={s.catTile} onClick={() => pickCat(c.name)}>
+                <a key={c.name} className={s.catTile} href={`/category/${encodeURI(catSlug(c.name))}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {c.image && <img src={c.image} alt={c.name} loading="lazy" />}
                   <div className={s.catLabel}><b>{c.name}</b><span>{toBnDigits(c.count)}টি পণ্য</span></div>
-                </button>
+                </a>
               ))}
             </div>
           </section>
@@ -113,10 +113,10 @@ export default function StoreHome({ settings, products, loadError }) {
           <div className={s.toolbar}>
             <div className={s.chips}>
               <button className={`${s.chip} ${!cat ? s.chipActive : ""}`} onClick={() => setCat("")}>সব</button>
-              {categories.map((c) => <button key={c} className={`${s.chip} ${cat === c ? s.chipActive : ""}`} onClick={() => setCat(c)}>{c}</button>)}
+              {categories.map((c) => <a key={c} href={`/category/${encodeURI(catSlug(c))}`} className={`${s.chip} ${cat === c ? s.chipActive : ""}`} style={{ textDecoration: "none" }}>{c}</a>)}
             </div>
             <select className={s.sort} value={sort} onChange={(e) => setSort(e.target.value)} aria-label="সাজান">
-              <option value="new">নতুন আগে</option>
+              <option value="new">ডিফল্ট ক্রম</option>
               <option value="low">দাম: কম → বেশি</option>
               <option value="high">দাম: বেশি → কম</option>
             </select>

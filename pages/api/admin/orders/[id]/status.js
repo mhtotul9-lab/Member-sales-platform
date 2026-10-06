@@ -52,8 +52,9 @@ async function handler(req, res) {
       const order = orderSnap.data();
       const oldStatus = order.status;
 
-      const memberRef = adminDb.collection("members").doc(order.memberId);
-      const memberSnap = await tx.get(memberRef);
+      // ওয়েবসাইট অর্ডারে memberId থাকে না — তখন মেম্বার খোঁজা/আপডেট বাদ যাবে (আগে এখানেই ক্র্যাশ করত)
+      const memberRef = order.memberId ? adminDb.collection("members").doc(order.memberId) : null;
+      const memberSnap = memberRef ? await tx.get(memberRef) : null;
 
       const wasValid = VALID_SALE_STATUSES.includes(oldStatus);
       const isValid = VALID_SALE_STATUSES.includes(status);
@@ -68,7 +69,7 @@ async function handler(req, res) {
 
       tx.update(orderRef, orderUpdate);
 
-      if (memberSnap.exists && wasValid !== isValid) {
+      if (memberSnap && memberSnap.exists && wasValid !== isValid) {
         const member = memberSnap.data();
         const sign = isValid ? 1 : -1;
         tx.update(memberRef, {
@@ -95,11 +96,13 @@ async function handler(req, res) {
     timestamp: now,
   });
 
-  await notifyUser(result.memberId, {
-    type: "order_status",
-    message: (STATUS_MESSAGE[status] || (() => `আপনার অর্ডার ${result.orderId} স্ট্যাটাস পরিবর্তন হয়েছে: ${status}`))({ orderId: result.orderId }),
-    link: "/member/orders",
-  });
+  if (result.memberId) {
+    await notifyUser(result.memberId, {
+      type: "order_status",
+      message: (STATUS_MESSAGE[status] || (() => `আপনার অর্ডার ${result.orderId} স্ট্যাটাস পরিবর্তন হয়েছে: ${status}`))({ orderId: result.orderId }),
+      link: "/member/orders",
+    });
+  }
 
   // Profit sharing runs after the transition is safely committed. It touches
   // a variable-size set of member documents (the eligible-active snapshot),
