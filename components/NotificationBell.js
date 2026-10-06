@@ -10,9 +10,11 @@ export default function NotificationBell() {
     let cancelled = false;
 
     async function poll() {
+      // ট্যাব লুকানো থাকলে রিড খরচ করা হয় না
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       try {
         const token = await user.getIdToken();
-        const res = await fetch("/api/notifications", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("/api/notifications/unread-count", { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) return;
         const body = await res.json();
         if (!cancelled) setUnreadCount(body.unreadCount || 0);
@@ -22,8 +24,10 @@ export default function NotificationBell() {
     }
 
     poll();
-    const interval = setInterval(poll, 30000);
-    return () => { cancelled = true; clearInterval(interval); };
+    const interval = setInterval(poll, 120000); // ২ মিনিট
+    const onVisible = () => { if (document.visibilityState === "visible") poll(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { cancelled = true; clearInterval(interval); document.removeEventListener("visibilitychange", onVisible); };
   }, [user]);
 
   return (
