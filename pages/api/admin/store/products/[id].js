@@ -2,7 +2,7 @@ import { adminDb } from "../../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 import { guardAdmin } from "../../../../../lib/store/adminApi";
 import { slugify } from "../../../../../lib/store/shared";
-import { buildProductDoc } from "../../../../../lib/store/productDoc";
+import { buildProductDoc, PRODUCT_STATUSES } from "../../../../../lib/store/productDoc";
 
 async function handler(req, res) {
   if (!(await guardAdmin(req, res))) return;
@@ -19,6 +19,20 @@ async function handler(req, res) {
       if (!dup.empty) return res.status(400).json({ error: "এই slug আগে থেকেই আছে, অন্য একটা দিন।" });
     }
     await ref.update(doc);
+    return res.status(200).json({ ok: true });
+  }
+  if (req.method === "PATCH") {
+    // তালিকা থেকে দ্রুত এডিট — শুধু যে ঘরগুলো পাঠানো হয়েছে সেগুলো বদলায়
+    const b = req.body || {};
+    const u = { updatedAt: new Date().toISOString() };
+    if (b.name !== undefined) { const n = String(b.name).trim(); if (!n) return res.status(400).json({ error: "নাম খালি রাখা যাবে না।" }); u.name = n; }
+    if (b.category !== undefined) u.category = String(b.category).trim();
+    if (b.price !== undefined) { const v = Number(b.price); if (!(v > 0)) return res.status(400).json({ error: "সঠিক বিক্রয় মূল্য দিন।" }); u.price = v; }
+    if (b.comparePrice !== undefined) u.comparePrice = Number(b.comparePrice) || 0;
+    if (b.costPrice !== undefined) u.costPrice = Number(b.costPrice) || 0;
+    if (b.stock !== undefined) u.stock = b.stock === "" || b.stock === null ? null : Math.max(0, Math.floor(Number(b.stock) || 0));
+    if (b.status !== undefined) { if (!PRODUCT_STATUSES.includes(b.status)) return res.status(400).json({ error: "অবৈধ স্ট্যাটাস।" }); u.status = b.status; }
+    await ref.update(u);
     return res.status(200).json({ ok: true });
   }
   if (req.method === "POST") {
