@@ -53,6 +53,20 @@ export default function AdminOverview() {
     <div className="shell">
       <Nav role="admin" active="overview" />
       <div className="container">
+        <a
+          href="/admin/store"
+          className="card"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 20, textDecoration: "none", color: "#fff", background: "linear-gradient(135deg, #12213B, #1F7A5C)", border: "none" }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span style={{ fontSize: "2rem" }}>🛍️</span>
+            <span>
+              <b style={{ fontSize: "1.15rem", display: "block", color: "#fff" }}>ইকমার্স স্টোর ম্যানেজ করুন</b>
+              <span style={{ opacity: 0.85, fontSize: "0.9rem" }}>অর্ডার, প্রোডাক্ট, কুরিয়ার, ইম্পোর্ট ও সেটিংস — সব এক জায়গায়</span>
+            </span>
+          </span>
+          <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>খুলুন →</span>
+        </a>
         {error && <p className="error-text" style={{ whiteSpace: "pre-wrap" }}>{error}</p>}
         {!data && !error && <Loading />}
 

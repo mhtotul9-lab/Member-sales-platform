@@ -1,6 +1,7 @@
 import { adminDb } from "../../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../../lib/apiWrapper";
 import { guardAdmin } from "../../../../../lib/store/adminApi";
+import { slugify } from "../../../../../lib/store/shared";
 import { buildProductDoc } from "../../../../../lib/store/productDoc";
 
 async function handler(req, res) {
@@ -19,6 +20,15 @@ async function handler(req, res) {
     }
     await ref.update(doc);
     return res.status(200).json({ ok: true });
+  }
+  if (req.method === "POST") {
+    // প্রোডাক্ট ডুপ্লিকেট (ড্রাফট হিসেবে) — একই ধরনের অনেক প্রোডাক্ট দ্রুত তুলতে
+    const d = snap.data();
+    const now = new Date().toISOString();
+    const copy = { ...d, name: `${d.name} (কপি)`, slug: slugify(d.name), status: "draft", createdAt: now, updatedAt: now };
+    delete copy.sourceProductId;
+    const ref2 = await adminDb.collection("store_products").add(copy);
+    return res.status(201).json({ id: ref2.id });
   }
   if (req.method === "DELETE") {
     // পুরনো অর্ডারে প্রোডাক্টের নাম/দাম কপি করা থাকে, তাই ডিলিট করলে অর্ডার নষ্ট হয় না।

@@ -59,7 +59,7 @@ export default function StoreOrders() {
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 700 }}>{o.orderNo} <span className={`stamp ${ORDER_STATUSES[o.status]?.cls}`} style={{ marginLeft: 6 }}>{ORDER_STATUSES[o.status]?.text || o.status}</span></div>
                 <div>{o.customer.name} · {o.customer.phone}{o.phoneOrderCount > 1 && <span style={{ color: "var(--gold)", fontWeight: 600 }}> · {o.phoneOrderCount}টি অর্ডার</span>}</div>
-                <div className="muted">{o.items[0].name} × {o.items[0].qty} · {new Date(o.createdAt).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}{o.courier && ` · কুরিয়ার: ${COURIER_STATUS_TEXT[o.courier.status] || o.courier.status}`}</div>
+                <div className="muted">{o.items[0].name}{o.items[0].variant && ` (${o.items[0].variant})`} × {o.items[0].qty} · {o.customer.area === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"} · {new Date(o.createdAt).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}{o.courier && ` · কুরিয়ার: ${COURIER_STATUS_TEXT[o.courier.status] || o.courier.status}`}</div>
               </div>
               <div style={{ fontWeight: 800 }}>{fmtPrice(o.total)}</div>
             </a>

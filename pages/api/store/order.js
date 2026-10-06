@@ -1,7 +1,8 @@
 import { adminDb } from "../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../lib/apiWrapper";
-import { normalizePhone, calcDelivery } from "../../../lib/store/shared";
+import { normalizePhone, calcDelivery, normalizeArea } from "../../../lib/store/shared";
 import { getSettings, dhakaDateKey } from "../../../lib/store/server";
+import { sendCapiPurchase } from "../../../lib/store/capi";
 
 // কাস্টমার অর্ডার — শুধু নাম, মোবাইল, ঠিকানা লাগে।
 async function handler(req, res) {
@@ -19,6 +20,11 @@ async function handler(req, res) {
   if (address.length < 10 || address.length > 300) return res.status(400).json({ error: "পূর্ণ ঠিকানা লিখুন (গ্রাম/এলাকা, থানা, জেলা সহ)।" });
   if (!b.productId) return res.status(400).json({ error: "প্রোডাক্ট পাওয়া যায়নি।" });
 
+  // ব্লক করা নাম্বার (ভুয়া/রিটার্ন-প্রবণ কাস্টমার)
+  const blocked = await adminDb.collection("store_blocked").doc(phone).get();
+  if (blocked.exists) return res.status(403).json({ error: "দুঃখিত, এই নাম্বার থেকে অর্ডার নেওয়া সম্ভব হচ্ছে না। অনুগ্রহ করে আমাদের সাথে সরাসরি যোগাযোগ করুন।" });
+
+  const area = normalizeArea(b.area);
   const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "").split(",")[0].trim();
   const now = Date.now();
 
@@ -64,14 +70,23 @@ async function handler(req, res) {
     const seq = ((cSnap.exists && cSnap.data()[field]) || 0) + 1;
     const orderNo = `JR-${dateKey}-${String(seq).padStart(4, "0")}`;
 
+    // সাইজ/রং থাকলে বাছাই বাধ্যতামূলক
+    const sizes = Array.isArray(p.sizes) ? p.sizes : [];
+    const colors = Array.isArray(p.colors) ? p.colors : [];
+    const size = String(b.size || "");
+    const color = String(b.color || "");
+    if (sizes.length && !sizes.includes(size)) { const e = new Error("সাইজ বাছাই করুন।"); e.statusCode = 400; throw e; }
+    if (colors.length && !colors.includes(color)) { const e = new Error("রং বাছাই করুন।"); e.statusCode = 400; throw e; }
+    const variant = [size && `সাইজ: ${size}`, color && `রং: ${color}`].filter(Boolean).join(", ");
+
     const price = Number(p.price) || 0;
     const subtotal = price * qty;
-    const deliveryCharge = calcDelivery(settings, subtotal, address);
+    const deliveryCharge = calcDelivery(settings, subtotal, area);
     const doc = {
       orderNo,
       status: "new",
-      customer: { name, phone, address },
-      items: [{ productId: pSnap.id, name: p.name, price, costPrice: Number(p.costPrice) || 0, qty, image: (p.images && p.images[0]) || "" }],
+      customer: { name, phone, address, area },
+      items: [{ productId: pSnap.id, name: p.name, price, costPrice: Number(p.costPrice) || 0, qty, variant, image: (p.images && p.images[0]) || "" }],
       subtotal,
       deliveryCharge,
       total: subtotal + deliveryCharge,
@@ -97,6 +112,8 @@ async function handler(req, res) {
   });
 
   const item = result.items[0];
+  // সার্ভার-সাইড Pixel (Conversions API) — টোকেন বসানো থাকলে চলে, না থাকলে চুপচাপ বাদ
+  sendCapiPurchase(result, req).catch(() => {});
   return res.status(201).json({
     ok: true,
     orderNo: result.orderNo,

@@ -11,6 +11,7 @@ export default function StoreOrderDetail() {
   const router = useRouter();
   const { id } = router.query;
   const [o, setO] = useState(null);
+  const [blocked, setBlocked] = useState(false);
   const [edit, setEdit] = useState(null);
   const [note, setNote] = useState("");
   const [msg, setMsg] = useState("");
@@ -20,7 +21,7 @@ export default function StoreOrderDetail() {
   const load = useCallback(async () => {
     try {
       const d = await api(`/api/admin/store/orders/${id}`);
-      setO(d.order);
+      setO(d.order); setBlocked(!!d.blocked);
       setNote(d.order.adminNote || "");
       setEdit({ ...d.order.customer, qty: d.order.items[0].qty, deliveryCharge: d.order.deliveryCharge });
     } catch (e) { setError(e.message); }
@@ -64,7 +65,8 @@ export default function StoreOrderDetail() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600 }}>{it.name}</div>
-              <div className="muted">{fmtPrice(it.price)} × {it.qty}</div>
+              <div className="muted">{fmtPrice(it.price)} × {it.qty}{it.variant && ` · ${it.variant}`}</div>
+              <div className="muted">এলাকা: {o.customer.area === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontWeight: 800, fontSize: "1.15rem" }}>{fmtPrice(o.total)}</div>
@@ -94,6 +96,8 @@ export default function StoreOrderDetail() {
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-primary btn-sm" disabled={!!busy} onClick={() => run("save", async () => { await patch({ customer: { name: edit.name, phone: edit.phone, address: edit.address }, qty: edit.qty, deliveryCharge: edit.deliveryCharge }); })}>সেভ করুন</button>
+            <a className="btn btn-outline btn-sm" href={`/admin/store/invoice?id=${id}`} target="_blank" rel="noreferrer">🖨️ ইনভয়েস</a>
+            <button className="btn btn-outline btn-sm" style={{ color: blocked ? "var(--teal)" : "var(--red)" }} disabled={!!busy} onClick={() => run("block", async () => { if (!blocked && !confirm("এই নাম্বার থেকে আর অর্ডার নেওয়া হবে না। ব্লক করবেন?")) throw new Error("বাতিল করা হয়েছে।"); await api("/api/admin/store/block", { method: "POST", body: { phone: o.customer.phone, block: !blocked } }); return blocked ? "আনব্লক হয়েছে ✓" : "ব্লক হয়েছে ✓"; })}>{blocked ? "✔ আনব্লক করুন" : "🚫 নাম্বার ব্লক"}</button>
             <a className="btn btn-outline btn-sm" href={`tel:${o.customer.phone}`}>📞 কল</a>
             <a className="btn btn-outline btn-sm" target="_blank" rel="noreferrer" href={`https://wa.me/88${o.customer.phone}`}>💬 WhatsApp</a>
           </div>

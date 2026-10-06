@@ -27,13 +27,17 @@ export default function StoreProducts() {
         <div className="card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <h1 style={{ fontSize: "1.25rem", margin: 0 }}>স্টোরের প্রোডাক্ট</h1>
-            <a href="/admin/store/products/new" className="btn btn-teal btn-sm">+ নতুন প্রোডাক্ট</a>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/admin/store/import" className="btn btn-outline btn-sm">⚡ রিসেলিং থেকে ইম্পোর্ট</a>
+              <a href="/admin/store/products/new" className="btn btn-teal btn-sm">+ নতুন প্রোডাক্ট</a>
+            </div>
           </div>
           {error && <p className="error-text">{error}</p>}
           {!products && !error && <Loading />}
           {products && products.length === 0 && <div className="empty-state">এখনো কোনো প্রোডাক্ট নেই। “নতুন প্রোডাক্ট” চেপে প্রথমটা যোগ করুন।</div>}
           {products && products.map((p) => (
-            <a key={p.id} href={`/admin/store/products/${p.id}`} className="list-row" style={{ textDecoration: "none", color: "inherit", gap: 12 }}>
+            <div key={p.id} className="list-row" style={{ gap: 12 }}>
+              <a href={`/admin/store/products/${p.id}`} style={{ textDecoration: "none", color: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", gap: 12, alignItems: "center", minWidth: 0 }}>
                 <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", background: "#eef1ef", flex: "none" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,7 +52,9 @@ export default function StoreProducts() {
                 <div style={{ fontWeight: 700 }}>{fmtPrice(p.price)}</div>
                 <span className={`stamp ${STATUS[p.status]?.[1]}`}>{STATUS[p.status]?.[0] || p.status}</span>
               </div>
-            </a>
+              </a>
+              <button className="btn btn-outline btn-sm" title="কপি করে ড্রাফট বানান" onClick={async () => { try { await api(`/api/admin/store/products/${p.id}`, { method: "POST" }); const d = await api("/api/admin/store/products"); setProducts(d.products); } catch (e) { setError(e.message); } }}>কপি</button>
+            </div>
           ))}
         </div>
       </div>

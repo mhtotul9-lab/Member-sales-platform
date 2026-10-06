@@ -13,7 +13,10 @@ async function handler(req, res) {
   if (!snap.exists) return res.status(404).json({ error: "অর্ডার পাওয়া যায়নি।" });
   const order = snap.data();
 
-  if (req.method === "GET") return res.status(200).json({ order: { id: snap.id, ...order } });
+  if (req.method === "GET") {
+    const blocked = (await adminDb.collection("store_blocked").doc(order.customer.phone).get()).exists;
+    return res.status(200).json({ order: { id: snap.id, ...order }, blocked });
+  }
 
   if (req.method === "DELETE") {
     await ref.delete();
@@ -31,7 +34,7 @@ async function handler(req, res) {
       const phone = normalizePhone(b.customer.phone ?? order.customer.phone);
       if (!name || !address) return res.status(400).json({ error: "নাম ও ঠিকানা খালি রাখা যাবে না।" });
       if (!phone) return res.status(400).json({ error: "সঠিক মোবাইল নাম্বার দিন।" });
-      update.customer = { name, phone, address };
+      update.customer = { name, phone, address, area: b.customer.area ? (b.customer.area === "inside" ? "inside" : "outside") : order.customer.area || "outside" };
       logs.push("কাস্টমারের তথ্য এডিট করা হয়েছে");
     }
 
