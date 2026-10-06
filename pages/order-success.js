@@ -26,6 +26,7 @@ export default function OrderSuccess({ settings }) {
           // GTM/সার্ভার ট্যাগ Advanced Matching ও Enhanced Conversions এ ব্যবহার করতে পারবে
           user_data: { phone_number: "+88" + data.phone, address: { first_name: String(data.name || "").split(" ")[0], last_name: String(data.name || "").split(" ").slice(1).join(" "), country: "BD" } },
           order_id: data.orderNo,
+          customer: { phone: "88" + data.phone, first_name: String(data.name || "").split(" ")[0], last_name: String(data.name || "").split(" ").slice(1).join(" "), country: "bd", fbp: (document.cookie.match(/(?:^|; )_fbp=([^;]*)/) || [])[1] || "", fbc: (document.cookie.match(/(?:^|; )_fbc=([^;]*)/) || [])[1] || "" },
         });
       }
     } catch (e) {}
