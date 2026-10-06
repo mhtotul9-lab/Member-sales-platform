@@ -1,58 +1,72 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import StoreLayout from "../components/store/StoreLayout";
-import { getStoreSettings, publicSettings } from "../lib/storefront";
-import { ORDER_STATUS_LABELS } from "../lib/orderStatus";
-import { taka } from "../components/store/ProductCard";
+import s from "../styles/store.module.css";
+import { getSettings } from "../lib/store/server";
+import { fmtPrice, ORDER_STATUSES, COURIER_STATUS_TEXT } from "../lib/store/shared";
 
-export async function getServerSideProps() {
-  return { props: { settings: publicSettings(await getStoreSettings()) } };
+export async function getServerSideProps({ res }) {
+  res.setHeader("Cache-Control", "no-store");
+  return { props: { settings: await getSettings() } };
 }
 
+const FLOW = ["new", "confirmed", "shipped", "delivered"];
+const FLOW_LABEL = ["অর্ডার হয়েছে", "কনফার্মড", "কুরিয়ারে", "ডেলিভার্ড"];
+
 export default function Track({ settings }) {
-  const [orderId, setOrderId] = useState("");
+  const [orderNo, setOrderNo] = useState("");
   const [phone, setPhone] = useState("");
-  const [order, setOrder] = useState(null);
-  const [error, setError] = useState("");
+  const [r, setR] = useState(null);
+  const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { const o = new URLSearchParams(location.search).get("o"); if (o) setOrderId(o); }, []);
+  useEffect(() => {
+    try { const last = JSON.parse(localStorage.getItem("jr_my_orders") || "[]")[0]; if (last) { setOrderNo(last.orderNo); setPhone(last.phone); } } catch (e) {}
+  }, []);
 
-  async function submit(e) {
-    e.preventDefault();
-    setBusy(true); setError(""); setOrder(null);
+  async function go(e) {
+    e.preventDefault(); setErr(""); setR(null); setBusy(true);
     try {
-      const res = await fetch("/api/public/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId, phone }) });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || "খুঁজে পাওয়া যায়নি।");
-      setOrder(body.order);
-    } catch (err) { setError(err.message); } finally { setBusy(false); }
+      const res = await fetch("/api/store/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderNo, phone }) });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      setR(d);
+    } catch (e2) { setErr(e2.message || "খুঁজে পাওয়া যায়নি।"); }
+    setBusy(false);
   }
 
-  const label = (s) => (ORDER_STATUS_LABELS[s] || { text: s }).text;
+  const idx = r ? (r.status === "no_answer" ? 0 : FLOW.indexOf(r.status)) : -1;
+  const bad = r && ["cancelled", "returned"].includes(r.status);
 
   return (
-    <StoreLayout settings={settings} title="অর্ডার ট্র্যাক">
-      <div className="st-wrap st-narrow">
-        <h1 className="st-h2">অর্ডার ট্র্যাক করুন</h1>
-        <form className="st-form" onSubmit={submit}>
-          <label>অর্ডার নম্বর<input value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="ORD-20260101-0001" /></label>
-          <label>মোবাইল নম্বর<input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="numeric" placeholder="01XXXXXXXXX" /></label>
-          {error && <p className="st-error" role="alert">{error}</p>}
-          <button className="st-btn st-btn-block" disabled={busy}>{busy ? "খোঁজা হচ্ছে…" : "ট্র্যাক করুন"}</button>
-        </form>
-        {order && (
-          <div className="st-form st-result">
-            <h2>{order.orderId}</h2>
-            <p>{order.productName} · {taka(order.total)}</p>
-            <p className="st-status">বর্তমান অবস্থা: <b>{label(order.status)}</b></p>
-            {order.trackingId && <p>কুরিয়ার: {order.courierName || "—"} · ট্র্যাকিং আইডি: <b>{order.trackingId}</b></p>}
-            <ul className="st-timeline">
-              {order.timeline.slice().reverse().map((t, i) => (
-                <li key={i}><b>{label(t.status)}</b><span>{new Date(t.at).toLocaleString("bn-BD")}</span></li>
-              ))}
-            </ul>
-          </div>
-        )}
+    <StoreLayout settings={settings} title={`অর্ডার ট্র্যাক — ${settings.storeName}`}>
+      <div className={s.wrap}>
+        <div className={s.success} style={{ textAlign: "left" }}>
+          <h1 style={{ margin: "0 0 6px", fontSize: "1.4rem", textAlign: "center" }}>অর্ডার ট্র্যাক করুন</h1>
+          <p style={{ textAlign: "center", color: "#6B6671", margin: "0 0 18px", fontSize: ".9rem" }}>অর্ডার নাম্বার ও যে মোবাইল দিয়ে অর্ডার করেছেন সেটা লিখুন।</p>
+          <form onSubmit={go}>
+            <div className={s.fld}><label>অর্ডার নাম্বার</label><input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="JR-20261006-0001" /></div>
+            <div className={s.fld}><label>মোবাইল নাম্বার</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="০১XXXXXXXXX" /></div>
+            {err && <p className={s.err}>{err}</p>}
+            <button className={s.submit} disabled={busy}>{busy ? "খোঁজা হচ্ছে..." : "অবস্থা দেখুন"}</button>
+          </form>
+          {r && (
+            <div style={{ marginTop: 22, borderTop: "1px dashed #e6ded2", paddingTop: 18 }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {r.item.image && <div style={{ width: 56, height: 70, borderRadius: 10, overflow: "hidden", background: "#f3ece2", flex: "none" }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={r.item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>}
+                <div><b>{r.item.name}</b><div style={{ fontSize: ".85rem", color: "#6B6671" }}>{r.item.variant && `${r.item.variant} · `}{r.orderNo} · মোট {fmtPrice(r.total)}</div></div>
+              </div>
+              {bad ? (
+                <p style={{ marginTop: 16, color: "#8B1E3F", fontWeight: 700 }}>অর্ডারের অবস্থা: {ORDER_STATUSES[r.status].text}</p>
+              ) : (
+                <div className={s.steps}>
+                  {FLOW_LABEL.map((l, i) => <div key={l} className={`${s.step} ${i <= idx ? s.stepOn : ""}`}><i>{i <= idx ? "✓" : i + 1}</i>{l}</div>)}
+                </div>
+              )}
+              {r.status === "no_answer" && <p style={{ fontSize: ".88rem" }}>আমরা আপনাকে ফোনে পাইনি। অনুগ্রহ করে আমাদের কল করুন।</p>}
+              {r.courier && <p style={{ fontSize: ".9rem", margin: "10px 0 0" }}>কুরিয়ার: <b>{COURIER_STATUS_TEXT[r.courier.status] || r.courier.status}</b>{r.courier.trackingCode && <> · <a href={`https://steadfast.com.bd/t/${r.courier.trackingCode}`} target="_blank" rel="noreferrer">কুরিয়ার ট্র্যাকিং ↗</a></>}</p>}
+            </div>
+          )}
+        </div>
       </div>
     </StoreLayout>
   );

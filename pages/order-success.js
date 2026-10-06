@@ -43,7 +43,14 @@ export default function OrderSuccess({ settings }) {
           ) : (
             <p style={{ margin: "10px 0 18px" }}>ধন্যবাদ! আমরা শীঘ্রই ফোন করে অর্ডার কনফার্ম করব।</p>
           )}
-          <a href="/" className={s.heroBtn} style={{ background: "#12213B", color: "#fff" }}>আরও পণ্য দেখুন</a>
+          <div className={s.steps}>
+            <div className={`${s.step} ${s.stepOn}`}><i>✓</i>অর্ডার হয়েছে</div>
+            <div className={s.step}><i>২</i>ফোনে কনফার্ম</div>
+            <div className={s.step}><i>৩</i>কুরিয়ারে</div>
+            <div className={s.step}><i>৪</i>ডেলিভারি</div>
+          </div>
+          <p style={{ margin: "14px 0 18px", fontSize: ".88rem" }}><a href="/track">অর্ডারের অবস্থা দেখতে এখানে চাপুন →</a></p>
+          <a href="/" className={s.btnGold} style={{ background: "#12213B", color: "#fff", boxShadow: "none" }}>আরও পণ্য দেখুন</a>
           {wa && <p style={{ marginTop: 16, fontSize: "0.9rem" }}>কিছু জানতে চাইলে <a href={wa} target="_blank" rel="noreferrer">WhatsApp এ মেসেজ করুন</a></p>}
         </div>
       </div>

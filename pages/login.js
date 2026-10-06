@@ -19,7 +19,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/"); // index.js redirects based on status/role
+      router.replace("/go"); // /go পেজ রোল দেখে অ্যাডমিন/মেম্বার প্যানেলে পাঠায় (jolrasi.com এ "/" এখন স্টোর)
     } catch (err) {
       const code = err?.code || "";
       if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) {
