@@ -26,6 +26,10 @@ FB_CAPI_TEST_CODE = (শুধু পরীক্ষার সময়, Test Ev
 - components/Nav.js — অ্যাডমিন মেনুতে "স্টোর" লিংক
 - pages/admin/dashboard.js — "ইকমার্স স্টোর ম্যানেজ করুন" বাটন
 
+## আরও পুরনো ফাইলে ছোট বাগ-ফিক্স (আপনার অনুরোধে)
+- pages/api/admin/orders/[id]/status.js — ওয়েবসাইট অর্ডারে (মেম্বার ছাড়া) স্ট্যাটাস বদলাতে এরর আসত; ঠিক করা হয়েছে
+- lib/business.js — মেম্বার ছাড়া অর্ডারে কমিশন ফাংশন চুপচাপ বাদ দেওয়ার ৩টি গার্ড লাইন (বাকি হিসাব অপরিবর্তিত)
+
 ## জরুরি
 - Firestore Rules বদলাতে হবে না (স্টোরের সব ডেটা সার্ভার API দিয়ে যায়)।
 - নতুন Firestore collection: store_products, store_orders, store_images, store_settings

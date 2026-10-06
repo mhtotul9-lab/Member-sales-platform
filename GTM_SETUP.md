@@ -1,26 +1,22 @@
-# GTM সংযোগ — ধাপে ধাপে
+# GTM ও পিক্সেল — আপনার আগের কন্টেইনারের সাথে
 
-## সাইটের দিক থেকে কী করা আছে
-- সাইটে এখন GTM Web কন্টেইনার **GTM-P8FMFQD5 (Jolrasi.com)** লোড হয়।
-- Pixel সরাসরি লোড হয় না (নইলে একই ইভেন্ট ২ বার গণনা হতো)। সব ইভেন্ট GTM এর dataLayer দিয়ে যায়।
-- ইভেন্ট: page_view, view_item, add_to_cart, begin_checkout, purchase, search (GA4 ইকমার্স ফরম্যাট, event_id সহ)।
-- purchase এ গ্রাহকের ফোন ও নাম (Advanced Matching) আর অর্ডার নাম্বারও যায়।
+আপনার GTM-P8FMFQD5 এ WordPress আমলের সব ট্যাগ (Facebook Pixel, FB | SS সার্ভার ট্যাগ, TikTok) আগে থেকেই আছে।
+তাই আগে দেওয়া `jolrasi-store-gtm-import.json` **ইম্পোর্ট করবেন না** — ওটা ডুপ্লিকেট ট্যাগ বানাত।
 
-## GTM এ করণীয়
-1. tagmanager.google.com → **Jolrasi.com** (GTM-P8FMFQD5) চাপুন।
-2. **Admin** → **Import Container**।
-3. **Choose container file** → `gtm/jolrasi-store-gtm-import.json` দিন।
-4. **Workspace**: Existing → Default Workspace বাছুন।
-5. **Import option**: **Merge** → **Rename conflicting tags, triggers, and variables** → **Confirm**।
-6. **Tags** মেনুতে এখন ৬টা "JR - ..." ট্যাগ দেখবেন (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase, Search)।
-7. **আগের Meta Pixel ট্যাগ থাকলে** (যেমন "Facebook Pixel - PageView") সেটা Pause করুন, নইলে PageView/Purchase ২ বার যাবে।
-8. উপরে **Preview** চাপুন → `https://jolrasi.com` দিন → Connect। প্রোডাক্টে ঢুকলে Tag Assistant এ "JR - Meta ViewContent" Fired দেখা উচিত।
-9. Meta Events Manager → Pixel → **Test events** এ একই ইভেন্ট আসছে কিনা দেখুন।
-10. সব ঠিক থাকলে GTM এর **Submit** → **Publish**।
+## সাইট এখন যা পাঠায় (dataLayer)
+view_item, add_to_cart, begin_checkout, add_shipping_info, add_payment_info, purchase, search
+- `ecommerce.items[]` (item_id, item_name, item_brand, item_category, price, quantity), `ecommerce.value`, `ecommerce.currency`
+- একই তথ্য টপ-লেভেলেও: value, currency, transaction_id, content_ids, content_name
+- purchase এ: `customer` (phone, first_name, last_name, country, fbp, fbc) ও `user_data`
 
-## সার্ভার-সাইড (GTM-TFTHXNWN)
-- Server কন্টেইনারে ডেটা পাঠাতে Web কন্টেইনারে Google ট্যাগ/GA4 ট্যাগে `server_container_url` লাগে। আপনার sGTM ডোমেইন ও GA4 Measurement ID দিলে সেটা যোগ করে দেব।
-- sGTM দিয়ে Meta CAPI Purchase পাঠালে Vercel এ **FB_CAPI_TOKEN বসাবেন না**, নইলে সার্ভার থেকে Purchase ২ বার যাবে।
+## আপনার ট্রিগারের সাথে মিল
+- cEvent-begin_checkout এ শর্ত "Page URL contains /checkout" আছে। সাইটে চেকআউট পেজ নেই, তাই ফর্মে লেখা শুরু হলে URL এর শেষে `#/checkout` বসে (পেজ রিলোড হয় না)।
+  Preview এ begin_checkout ফায়ার না করলে ট্রিগার খুলে ওই শর্তটা মুছে "All Custom Events" করে দিন।
+
+## পরীক্ষা: jolrasi.com/tracking-check
+পেজটা খুললে ৪ সেকেন্ড পর দেখায়: GTM লোড হলো কিনা, কোন Pixel ID চালু, Facebook এ কোন ইভেন্ট গেল, সার্ভার কন্টেইনারের হোস্ট, ব্লকার আছে কিনা।
+"টেস্ট ইভেন্ট পাঠান" চাপলে একটা ViewContent পাঠিয়ে দেখায় GTM থেকে Pixel এ গেল কিনা।
 
 ## মোড বদল
-- ডিফল্ট: GTM মোড। সরাসরি Pixel চাইলে Vercel এ `NEXT_PUBLIC_TRACKING_MODE` = `direct` দিয়ে Redeploy করুন (তখন GTM লোড হয় না)।
+ডিফল্ট GTM মোড। Vercel এ `NEXT_PUBLIC_TRACKING_MODE`=`direct` দিলে GTM বাদ, সরাসরি Pixel (শুধু জরুরি অবস্থায়)।
+sGTM দিয়ে Meta CAPI পাঠালে Vercel এ `FB_CAPI_TOKEN` বসাবেন না (Purchase ২ বার যাবে)।
