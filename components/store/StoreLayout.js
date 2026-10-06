@@ -2,7 +2,7 @@ import { useState } from "react";
 import Head from "next/head";
 import Logo from "../Logo";
 import s from "../../styles/store.module.css";
-import { PIXEL_ID, pixelBaseCode, GTM_ID, gtmCode } from "../../lib/store/pixel";
+import { PIXEL_ID, pixelBaseCode, GTM_ID, gtmCode, TRACKING_MODE } from "../../lib/store/pixel";
 
 const NAV = [
   { href: "/", label: "হোম" },
@@ -30,12 +30,16 @@ export default function StoreLayout({ settings, title, description, image, child
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&display=swap" rel="stylesheet" />
         <script dangerouslySetInnerHTML={{ __html: "window.dataLayer=window.dataLayer||[];" }} />
-        {GTM_ID && <script dangerouslySetInnerHTML={{ __html: gtmCode }} />}
-        <script dangerouslySetInnerHTML={{ __html: pixelBaseCode }} />
+        {TRACKING_MODE === "gtm" && GTM_ID && <script dangerouslySetInnerHTML={{ __html: gtmCode }} />}
+        {TRACKING_MODE === "direct" && <script dangerouslySetInnerHTML={{ __html: pixelBaseCode }} />}
       </Head>
       <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img height="1" width="1" style={{ display: "none" }} alt="" src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`} />
+        {TRACKING_MODE === "gtm" && GTM_ID ? (
+          <iframe src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} title="gtm" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img height="1" width="1" style={{ display: "none" }} alt="" src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`} />
+        )}
       </noscript>
 
       <div className={s.topbar}>
