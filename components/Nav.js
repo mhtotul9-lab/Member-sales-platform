@@ -13,6 +13,7 @@ export default function Nav({ role, active }) {
     role === "admin"
       ? [
           { href: "/admin/dashboard", label: "ড্যাশবোর্ড", key: "overview" },
+          { href: "/admin/store", label: "🛍️ স্টোর", key: "store" },
           { href: "/admin/members", label: "মেম্বার", key: "members" },
           { href: "/admin/products", label: "প্রোডাক্ট", key: "products" },
           { href: "/admin/orders", label: "অর্ডার", key: "orders" },

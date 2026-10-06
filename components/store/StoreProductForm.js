@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { resizeImage } from "../../lib/store/imageResize";
 
-const EMPTY = { name: "", category: "", price: "", comparePrice: "", costPrice: "", stock: "", status: "active", featured: false, sortOrder: "", slug: "", images: [], shortDescription: "", description: "" };
+const EMPTY = { name: "", category: "", price: "", comparePrice: "", costPrice: "", stock: "", status: "active", featured: false, sortOrder: "", slug: "", sizes: "", colors: "", images: [], shortDescription: "", description: "" };
 
 export default function StoreProductForm({ initial, onSubmit, submitting, error, submitLabel, api }) {
-  const [f, setF] = useState({ ...EMPTY, ...(initial || {}), price: initial?.price ?? "", comparePrice: initial?.comparePrice || "", costPrice: initial?.costPrice ?? "", stock: initial?.stock ?? "", sortOrder: initial?.sortOrder || "" });
+  const [f, setF] = useState({ ...EMPTY, ...(initial || {}), price: initial?.price ?? "", comparePrice: initial?.comparePrice || "", costPrice: initial?.costPrice ?? "", stock: initial?.stock ?? "", sortOrder: initial?.sortOrder || "", sizes: (initial?.sizes || []).join(", "), colors: (initial?.colors || []).join(", ") });
   const [uploading, setUploading] = useState(false);
   const [upErr, setUpErr] = useState("");
   const [urlInput, setUrlInput] = useState("");
@@ -86,6 +86,15 @@ export default function StoreProductForm({ initial, onSubmit, submitting, error,
         </div>
       </div>
 
+      {Number(f.price) > 0 && f.costPrice !== "" && (
+        <p style={{ margin: "0 0 14px", padding: "10px 14px", borderRadius: 10, background: "var(--paper)", fontWeight: 600 }}>
+          প্রতি পিসে লাভ: <span style={{ color: Number(f.price) - Number(f.costPrice) >= 0 ? "var(--teal)" : "var(--red)" }}>৳{Number(f.price) - Number(f.costPrice)}</span>
+        </p>
+      )}
+      <div className="form-grid-2">
+        <div className="field"><label>সাইজ (কমা দিয়ে লিখুন, যেমন: M, L, XL) — ঐচ্ছিক</label><input value={f.sizes} onChange={(e) => set("sizes", e.target.value)} placeholder="খালি রাখলে সাইজ জিজ্ঞেস করবে না" /></div>
+        <div className="field"><label>রং (কমা দিয়ে লিখুন) — ঐচ্ছিক</label><input value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="যেমন: লাল, নীল, কালো" /></div>
+      </div>
       <div className="field"><label>সংক্ষিপ্ত বর্ণনা (দামের নিচে দেখাবে)</label><textarea rows={2} value={f.shortDescription} onChange={(e) => set("shortDescription", e.target.value)} /></div>
       <div className="field"><label>বিস্তারিত বিবরণ</label><textarea rows={6} value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
 

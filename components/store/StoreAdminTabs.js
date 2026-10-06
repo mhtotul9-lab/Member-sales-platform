@@ -2,6 +2,7 @@ const TABS = [
   { href: "/admin/store", label: "স্টোর ওভারভিউ", key: "overview" },
   { href: "/admin/store/orders", label: "অর্ডার", key: "orders" },
   { href: "/admin/store/products", label: "প্রোডাক্ট", key: "products" },
+  { href: "/admin/store/import", label: "⚡ রিসেলিং থেকে ইম্পোর্ট", key: "import" },
   { href: "/admin/store/settings", label: "স্টোর সেটিংস", key: "settings" },
 ];
 
