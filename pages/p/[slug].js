@@ -47,7 +47,23 @@ export default function ProductPage({ settings, product: p, related, categories 
   function fireCheckout() {
     if (checkoutFired.current) return;
     checkoutFired.current = true;
+    // আপনার GTM ট্রিগার "cEvent-begin_checkout" এ শর্ত আছে: Page URL contains /checkout
+    // (WordPress এর চেকআউট পেজের জন্য)। এখানে আলাদা চেকআউট পেজ নেই, তাই URL এ শুধু #/checkout যোগ হয় (পেজ রিলোড/স্ক্রল হয় না)।
+    try { if (!/\/checkout/.test(location.href)) history.replaceState(null, "", location.pathname + location.search + "#/checkout"); } catch (e) {}
     track("InitiateCheckout", { content_ids: [p.id], content_name: p.name, content_type: "product", num_items: 1, value: p.price, currency: "BDT", contents: [{ id: p.id, quantity: 1, item_price: p.price }] });
+  }
+
+  const shipFired = useRef(false);
+  const payFired = useRef(false);
+  const itemParams = { content_ids: [p.id], content_name: p.name, content_type: "product", content_category: p.category, num_items: 1, value: p.price, currency: "BDT", contents: [{ id: p.id, quantity: 1, item_price: p.price }] };
+
+  // নাম+মোবাইল+ঠিকানা পূরণ শেষ হলে একবার (আপনার GTM এর add_shipping_info ট্যাগের জন্য)
+  function maybeShipping() {
+    if (shipFired.current) return;
+    if (form.name.trim().length >= 2 && normalizePhone(form.phone) && form.address.trim().length >= 10) {
+      shipFired.current = true;
+      track("AddShippingInfo", itemParams);
+    }
   }
 
   function goOrder() {
@@ -67,6 +83,7 @@ export default function ProductPage({ settings, product: p, related, categories 
     if (form.address.trim().length < 10) return setError("পূর্ণ ঠিকানা লিখুন (গ্রাম/এলাকা, থানা, জেলা সহ)।");
     setBusy(true);
     try {
+      if (!payFired.current) { payFired.current = true; track("AddPaymentInfo", itemParams); } // ক্যাশ অন ডেলিভারি পেমেন্ট ধাপ
       if (!eventId.current) eventId.current = newEventId();
       const res = await fetch("/api/store/order", {
         method: "POST",
@@ -152,7 +169,7 @@ export default function ProductPage({ settings, product: p, related, categories 
                 <p className={s.formSub}>আমরা ফোনে কনফার্ম করে পণ্য পাঠিয়ে দেব।</p>
                 <div className={s.fld}><label htmlFor="n">আপনার নাম</label><input id="n" value={form.name} onFocus={fireCheckout} onChange={(e) => set("name", e.target.value)} placeholder="আপনার নাম লিখুন" autoComplete="name" /></div>
                 <div className={s.fld}><label htmlFor="ph">মোবাইল নাম্বার</label><input id="ph" type="tel" inputMode="numeric" value={form.phone} onFocus={fireCheckout} onChange={(e) => set("phone", e.target.value)} placeholder="০১XXXXXXXXX" autoComplete="tel" /></div>
-                <div className={s.fld}><label htmlFor="ad">সম্পূর্ণ ঠিকানা</label><textarea id="ad" rows={3} value={form.address} onFocus={fireCheckout} onChange={(e) => set("address", e.target.value)} placeholder="বাসা/গ্রাম, এলাকা, থানা, জেলা" autoComplete="street-address" /></div>
+                <div className={s.fld}><label htmlFor="ad">সম্পূর্ণ ঠিকানা</label><textarea id="ad" rows={3} value={form.address} onBlur={maybeShipping} onFocus={fireCheckout} onChange={(e) => set("address", e.target.value)} placeholder="বাসা/গ্রাম, এলাকা, থানা, জেলা" autoComplete="street-address" /></div>
 
                 <span className={s.areaLabel}>ডেলিভারি এলাকা</span>
                 <div className={s.areaGrid}>
