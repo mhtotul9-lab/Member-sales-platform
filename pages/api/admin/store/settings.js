@@ -1,14 +1,14 @@
 import { adminDb } from "../../../../lib/firebaseAdmin";
 import { withErrorHandling } from "../../../../lib/apiWrapper";
 import { guardAdmin } from "../../../../lib/store/adminApi";
-import { getSettings } from "../../../../lib/store/server";
+import { getSettings, clearStoreCache } from "../../../../lib/store/server";
 import { DEFAULT_SETTINGS } from "../../../../lib/store/shared";
 
 const NUMERIC = ["deliveryInsideDhaka", "deliveryOutsideDhaka", "freeDeliveryAbove"];
 
 async function handler(req, res) {
   if (!(await guardAdmin(req, res))) return;
-  if (req.method === "GET") return res.status(200).json({ settings: await getSettings() });
+  if (req.method === "GET") return res.status(200).json({ settings: await getSettings({ fresh: true }) });
   if (req.method === "PUT") {
     const body = req.body || {};
     const clean = {};
@@ -18,6 +18,7 @@ async function handler(req, res) {
     }
     if (clean.whatsapp) clean.whatsapp = clean.whatsapp.replace(/\D/g, "");
     await adminDb.collection("store_settings").doc("main").set(clean, { merge: true });
+    clearStoreCache();
     return res.status(200).json({ ok: true });
   }
   return res.status(405).json({ error: "Method not allowed" });

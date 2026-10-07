@@ -10,7 +10,9 @@ import { toBnDigits, catSlug } from "../../lib/store/shared";
 export async function getServerSideProps({ res }) {
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=300");
   try {
-    const [settings, products] = await Promise.all([getSettings(), listPublicProducts()]);
+    const [settings, all] = await Promise.all([getSettings(), listPublicProducts()]);
+    // হোমে কার্ডের জন্য যা লাগে শুধু তা পাঠাই — পেজ হালকা থাকে
+    const products = all.map(({ description, shortDescription, sizes, colors, ...rest }) => rest);
     return { props: { settings, products } };
   } catch (e) {
     console.error(e);
@@ -18,6 +20,8 @@ export async function getServerSideProps({ res }) {
     return { props: { settings: DEFAULT_SETTINGS, products: [], loadError: true } };
   }
 }
+
+const PER_CATEGORY = 8; // হোম পেজে প্রতি ক্যাটাগরিতে কয়টি পণ্য দেখাবে
 
 const TRUST = [
   { icon: "💵", t: "ক্যাশ অন ডেলিভারি", d: "হাতে পেয়ে টাকা দিন" },
@@ -31,6 +35,7 @@ export default function StoreHome({ settings, products, loadError }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("");
   const [sort, setSort] = useState("new");
+  const [openOther, setOpenOther] = useState(false);
   const searchTimer = useRef(null);
 
   useEffect(() => { if (router.query.cat) setCat(String(router.query.cat)); }, [router.query.cat]);
@@ -45,6 +50,16 @@ export default function StoreHome({ settings, products, loadError }) {
     if (sort === "high") l = [...l].sort((a, b) => b.price - a.price);
     return l;
   }, [products, q, cat, sort]);
+
+  // সার্চ/ক্যাটাগরি ফিল্টার না থাকলে ক্যাটাগরি ধরে ভাগ করে দেখাই (প্রতিটিতে PER_CATEGORY টি)
+  const grouped = useMemo(() => {
+    if (cat || q.trim()) return null;
+    const sorted = (l) => (sort === "low" ? [...l].sort((a, b) => a.price - b.price) : sort === "high" ? [...l].sort((a, b) => b.price - a.price) : l);
+    const groups = categories.map((c) => ({ name: c, items: sorted(products.filter((p) => p.category === c)) }));
+    const other = products.filter((p) => !p.category);
+    if (other.length) groups.push({ name: "", items: sorted(other) });
+    return groups;
+  }, [products, categories, cat, q, sort]);
 
   useEffect(() => {
     clearTimeout(searchTimer.current);
@@ -123,6 +138,33 @@ export default function StoreHome({ settings, products, loadError }) {
           </div>
           {list.length === 0 ? (
             <div className={s.empty}>{loadError ? "পণ্য লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।" : products.length === 0 ? "শীঘ্রই নতুন পণ্য আসছে।" : "কোনো পণ্য পাওয়া যায়নি।"}</div>
+          ) : grouped ? (
+            grouped.map((g) => {
+              const isOther = !g.name;
+              const shown = isOther && openOther ? g.items : g.items.slice(0, PER_CATEGORY);
+              const more = g.items.length - shown.length;
+              const href = isOther ? null : `/category/${encodeURI(catSlug(g.name))}`;
+              return (
+                <div key={g.name || "other"} style={{ marginBottom: 34 }}>
+                  {categories.length > 0 && (
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, margin: "0 0 14px" }}>
+                      <h3 style={{ margin: 0, fontFamily: '"Noto Serif Bengali", serif', fontSize: "1.2rem" }}>{g.name || "অন্যান্য"}</h3>
+                      {href && <a href={href} style={{ color: "#B98B3C", fontWeight: 700, fontSize: ".9rem", textDecoration: "none" }}>সব দেখুন →</a>}
+                    </div>
+                  )}
+                  <div className={s.grid}>{shown.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+                  {more > 0 && (
+                    <div style={{ textAlign: "center", marginTop: 18 }}>
+                      {href ? (
+                        <a href={href} className={s.btnGold}>আরও দেখুন ({toBnDigits(more)}টি) →</a>
+                      ) : (
+                        <button type="button" className={s.btnGold} style={{ border: 0, cursor: "pointer" }} onClick={() => setOpenOther(true)}>আরও দেখুন ({toBnDigits(more)}টি) ↓</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
           ) : (
             <div className={s.grid}>{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>
           )}

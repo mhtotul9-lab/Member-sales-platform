@@ -45,7 +45,7 @@ async function handler(req, res) {
     }
   }
 
-  const settings = await getSettings();
+  const settings = await getSettings({ fresh: true });
   const productRef = adminDb.collection("store_products").doc(String(b.productId));
   const counterRef = adminDb.collection("settings").doc("store_counters");
   const dateKey = dhakaDateKey();

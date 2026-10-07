@@ -25,7 +25,7 @@ const ACCOUNT_STATUS_LABEL = {
   rejected: { text: "রিজেক্টেড", cls: "stamp-rejected" },
 };
 
-const ONLINE_WINDOW_MS = 2 * 60 * 1000;
+const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
 function isOnline(lastActiveAt) {
   if (!lastActiveAt) return false;

@@ -5,7 +5,7 @@ import { auth, db } from "../lib/firebase";
 
 const AuthContext = createContext({ user: null, profile: null, loading: true });
 
-const HEARTBEAT_MS = 50 * 1000;
+const HEARTBEAT_MS = 3 * 60 * 1000; // রিড/রাইট কমাতে ৩ মিনিট (অ্যাডমিনের "অনলাইন" সময়সীমা ৫ মিনিট)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
