@@ -2,7 +2,6 @@ import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import { auth } from "../lib/firebase";
-import NotificationBell from "./NotificationBell";
 import Logo from "./Logo";
 
 export default function Nav({ role, active }) {
@@ -55,7 +54,6 @@ export default function Nav({ role, active }) {
       </div>
 
       <div className="topbar-actions">
-        <NotificationBell />
         <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
           লগ আউট
         </button>
@@ -77,8 +75,7 @@ export default function Nav({ role, active }) {
           </a>
         ))}
         <div className="mobile-menu-actions">
-          <NotificationBell />
-          <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
+            <button className="btn btn-outline btn-sm" onClick={() => signOut(auth).then(() => router.replace("/login"))}>
             লগ আউট
           </button>
         </div>
